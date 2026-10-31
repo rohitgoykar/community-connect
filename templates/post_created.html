@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+
+{% block title %}Notice Published - Matched Providers{% endblock %}
+
+{% block content %}
+<style>
+    .post-created-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+
+    /* Success Header Banner (Light Mode) */
+    .success-hero {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FAFBF7 100%);
+        border: 2px solid rgba(197, 160, 89, 0.45);
+        border-radius: 12px;
+        padding: 36px 32px;
+        text-align: center;
+        color: #0A0C10;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+    }
+
+    .success-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5E5332, #C5A059, #5E5332);
+    }
+
+    .success-hero-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        display: inline-block;
+        animation: bounce 1.8s infinite;
+    }
+
+    .success-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 30px;
+        color: #0A0C10;
+        margin: 0 0 6px 0;
+    }
+
+    .success-hero p {
+        color: #606875;
+        font-size: 14px;
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    /* Notice Meta Card */
+    .notice-summary-card {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-left: 4px solid #C5A059;
+        border-radius: 10px;
+        padding: 26px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .notice-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .notice-title-row h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 22px;
+        color: #0A0C10;
+        margin: 0;
+    }
+
+    .notice-desc {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #2D3748;
+        margin-bottom: 16px;
+    }
+
+    .notice-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .notice-tag {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+    .tag-gold { background: rgba(197, 160, 89, 0.15); color: #8A6D3B; border: 1px solid rgba(197, 160, 89, 0.35); }
+    .tag-blue { background: rgba(21, 101, 192, 0.1); color: #1565C0; border: 1px solid rgba(21, 101, 192, 0.25); }
+    .tag-loc  { background: rgba(46, 125, 50, 0.1); color: #2E7D32; border: 1px solid rgba(46, 125, 50, 0.25); }
+    .tag-dark { background: #0A0C10; color: #FFFFFF; }
+
+    /* Section Headers */
+    .matches-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .matches-section-header h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        color: #0A0C10;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Service Provider Match Card (Featured / Highlighted Rates) */
+    .provider-card-match {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        border-radius: 12px;
+        margin-bottom: 24px;
+        overflow: hidden;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+    }
+
+    .provider-card-match:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 48px rgba(197, 160, 89, 0.2);
+        border-color: #C5A059;
+    }
+
+    .provider-card-top {
+        background: linear-gradient(135deg, #0A0C10 0%, #1A2234 100%);
+        padding: 20px 26px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .provider-identity {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .provider-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #C5A059, #5E5332);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 22px;
+        font-weight: 700;
+        border: 2px solid rgba(197, 160, 89, 0.5);
+    }
+
+    .provider-name-box h4 {
+        color: #FFFFFF;
+        font-size: 18px;
+        margin: 0 0 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .verified-pill {
+        background: rgba(46, 204, 113, 0.2);
+        border: 1px solid #2ecc71;
+        color: #2ecc71;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .provider-trade-sub {
+        color: #C5A059;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .provider-score-badge {
+        background: linear-gradient(135deg, #5E5332, #C5A059);
+        color: #FFFFFF;
+        padding: 8px 18px;
+        border-radius: 24px;
+        font-weight: 800;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(197, 160, 89, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .provider-card-body {
+        padding: 24px 26px;
+    }
+
+    /* PROMINENT RATES DISPLAY STRIP */
+    .rates-showcase {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        background: linear-gradient(135deg, #F8F9F5 0%, #FAF6EE 100%);
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        border-radius: 10px;
+        padding: 18px 22px;
+        margin-bottom: 20px;
+    }
+
+    .rate-box {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rate-box-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #606875;
+        margin-bottom: 4px;
+    }
+
+    .rate-box-amount {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: 800;
+        color: #0A0C10;
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+    }
+
+    .rate-box-amount.highlight-gold {
+        color: #997328;
+    }
+
+    .rate-box-amount small {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #718096;
+        font-weight: 500;
+    }
+
+    .avail-status-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #10B981;
+    }
+
+    .avail-status-tag .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 6px #10B981;
+    }
+
+    /* Meta & Reasons */
+    .provider-meta-row {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #4A5568;
+        margin-bottom: 14px;
+    }
+
+    .provider-meta-row span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .synergy-list {
+        background: rgba(10, 12, 16, 0.03);
+        border-left: 3px solid #C5A059;
+        border-radius: 0 6px 6px 0;
+        padding: 10px 16px;
+        margin-bottom: 22px;
+    }
+
+    .synergy-list ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .synergy-list li {
+        font-size: 12.5px;
+        color: #1A202C;
+        font-weight: 500;
+    }
+
+    /* Action Buttons Row */
+    .provider-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-msg-provider {
+        background: #0A0C10;
+        color: #FFFFFF;
+        border: 1px solid #0A0C10;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s;
+        text-decoration: none;
+    }
+
+    .btn-msg-provider:hover {
+        background: #C5A059;
+        border-color: #C5A059;
+        color: #0A0C10;
+        transform: translateY(-2px);
+    }
+
+    .btn-call-provider {
+        background: #2E7D32;
+        color: #FFFFFF;
+        border: 1px solid #2E7D32;
+        padding: 12px 22px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s;
+        text-decoration: none;
+    }
+
+    .btn-call-provider:hover {
+        background: #1B5E20;
+        border-color: #1B5E20;
+        color: #FFFFFF;
+        transform: translateY(-2px);
+    }
+
+    .btn-view-prov {
+        background: transparent;
+        color: #4A5568;
+        border: 1px solid rgba(10, 12, 16, 0.2);
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s;
+        text-decoration: none;
+    }
+
+    .btn-view-prov:hover {
+        background: rgba(10, 12, 16, 0.05);
+        color: #0A0C10;
+    }
+
+    /* Fallback Match Box */
+    .no-matches-box {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 12px;
+        padding: 40px 30px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Bottom CTAs */
+    .bottom-cta-row {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 35px;
+        flex-wrap: wrap;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+</style>
+
+<div class="post-created-wrap">
+    
+    <!-- Hero Banner -->
+    <div class="success-hero">
+        <span class="success-hero-icon">✨</span>
+        <h1>Notice Published Successfully</h1>
+        <p>Your request has been broadcast across Sangamner. Our smart engine matched local verified professionals and skilled neighbors with transparent rates.</p>
+    </div>
+
+    <!-- The Published Notice Summary -->
+    <div class="notice-summary-card">
+        <div class="notice-title-row">
+            <h2>{{ post.title or 'Help / Service Request' }}</h2>
+            {% if post.urgency %}
+            <span class="notice-tag {% if post.urgency == 'Urgent' %}tag-gold{% elif post.urgency == 'High' %}tag-gold{% else %}tag-dark{% endif %}">
+                Urgency: {{ post.urgency }}
+            </span>
+            {% endif %}
+        </div>
+        <div class="notice-desc">
+            "{{ post.description }}"
+        </div>
+        <div class="notice-tags">
+            <span class="notice-tag tag-dark">Type: {{ post.post_type or 'Request Help' }}</span>
+            <span class="notice-tag tag-blue">Category: {{ post.category }}</span>
+            {% if post.service_subcategory %}
+            <span class="notice-tag tag-gold">Trade: {{ post.service_subcategory|title }}</span>
+            {% endif %}
+            <span class="notice-tag tag-loc">📍 {{ post.location or 'Sangamner' }}</span>
+        </div>
+    </div>
+
+    <!-- MATCHED SERVICE PROVIDERS SECTION -->
+    <div class="matches-section-header">
+        <div>
+            <h3>
+                <span>🔧</span>
+                <span>Direct Local Service Matches in {{ post.location or 'Sangamner' }}</span>
+            </h3>
+            <p style="color: #718096; font-size: 13.5px; margin: 4px 0 0 0;">
+                Showing service providers and specialists matching your trade requirement along with their transparent rates.
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('services_categories') }}" class="btn-view-prov" style="font-size: 11.5px; padding: 8px 14px;">
+                Browse All Trades &rarr;
+            </a>
+        </div>
+    </div>
+
+    {% if matches %}
+        {% for match in matches %}
+        <div class="provider-card-match card-tilt">
+            
+            <!-- Top Identity Bar -->
+            <div class="provider-card-top">
+                <div class="provider-identity">
+                    <div class="provider-avatar">
+                        {{ (match.user.name or match.user.username)[0]|upper }}
+                    </div>
+                    <div class="provider-name-box">
+                        <h4>
+                            <span>{{ match.user.name or match.user.username }}</span>
+                            <span class="verified-pill">✓ Verified</span>
+                        </h4>
+                        <p class="provider-trade-sub">
+                            {{ match.trade_icon or '🛠️' }} {{ match.trade_title or (match.user.skills or 'Skilled Professional') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="provider-score-badge">
+                    <span>✦</span> {{ match.match_score }}% Match
+                </div>
+            </div>
+
+            <!-- Body Details with Rates Showcase -->
+            <div class="provider-card-body">
+                
+                <!-- PROMINENT RATES DISPLAY -->
+                <div class="rates-showcase">
+                    <div class="rate-box">
+                        <span class="rate-box-label">Hourly Rate</span>
+                        <div class="rate-box-amount highlight-gold">
+                            {% if match.rate_per_hour and match.rate_per_hour > 0 %}
+                                ₹{{ "%.0f"|format(match.rate_per_hour) }} <small>/ hr</small>
+                            {% else %}
+                                ₹250 <small>/ hr (Std)</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="rate-box">
+                        <span class="rate-box-label">Visiting Charge</span>
+                        <div class="rate-box-amount">
+                            {% if match.rate_per_visit and match.rate_per_visit > 0 %}
+                                ₹{{ "%.0f"|format(match.rate_per_visit) }} <small>/ visit</small>
+                            {% else %}
+                                ₹400 <small>/ visit</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="rate-box">
+                        <span class="rate-box-label">Live Availability</span>
+                        <div class="avail-status-tag" style="margin-top: 6px;">
+                            <span class="dot"></span>
+                            <span>{{ match.availability or 'Available Today' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locality & Experience Info -->
+                <div class="provider-meta-row">
+                    <span>📍 <b>Area:</b> {{ match.service_area or match.user.location or 'Sangamner' }}</span>
+                    <span>⏱️ <b>Experience:</b> {{ match.experience_years or 5 }} Years</span>
+                    <span>⭐ <b>Rating:</b> {{ "%.1f"|format(match.user.rating or 4.9) }} / 5.0</span>
+                    <span>🛡️ <b>Trust Score:</b> {{ match.user.trust_score or 90 }}%</span>
+                </div>
+
+                <!-- Synergy Reasons -->
+                <div class="synergy-list">
+                    <ul>
+                        {% for reason in match.match_reasons %}
+                        <li>✦ {{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Direct Action Buttons -->
+                <div class="provider-actions">
+                    <button 
+                        type="button" 
+                        class="btn-msg-provider" 
+                        onclick="startChat({{ match.user.id }}, '{{ match.user.name or match.user.username }}')"
+                    >
+                        🔒 Private Chat
+                    </button>
+
+                    {% if match.contact or match.user.contact %}
+                    <a href="tel:{{ match.contact or match.user.contact }}" class="btn-call-provider">
+                        📞 Call {{ match.contact or match.user.contact }}
+                    </a>
+                    {% else %}
+                    <a href="tel:8767865434" class="btn-call-provider">
+                        📞 Call 8767865434
+                    </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('view_profile_route', user_id=match.user.id) }}" class="btn-view-prov">
+                        View Full Profile &rarr;
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-matches-box">
+            <div style="font-size: 38px; margin-bottom: 12px;">🔍</div>
+            <h4 style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">Searching Sangamner Service Network</h4>
+            <p style="color: #718096; font-size: 14px; max-width: 480px; margin: 0 auto 20px auto;">
+                We have notified all residents and providers in Sangamner. You can also explore our complete marketplace to browse plumbers and electricians directly.
+            </p>
+            <a href="{{ url_for('services_categories') }}" class="btn-luxury-gold" style="padding: 10px 22px; font-size: 12px;">
+                Explore Local Services Marketplace
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Bottom Action CTAs -->
+    <div class="bottom-cta-row">
+        <a href="{{ url_for('dashboard') }}" class="btn-luxury-primary" style="padding: 12px 24px; font-size: 12px;">
+            Go to Dashboard
+        </a>
+        <a href="{{ url_for('create_post') }}" class="btn-luxury-gold" style="padding: 12px 24px; font-size: 12px;">
+            + Create Another Post
+        </a>
+        <a href="{{ url_for('services_categories') }}" class="btn-luxury-outline" style="padding: 12px 24px; font-size: 12px;">
+            View Services by Trade &rarr;
+        </a>
+    </div>
+
+</div>
+
+<script>
+function startChat(userId, userName) {
+    window.location.href = `/communication?user_id=${userId}`;
+}
+</script>
+{% endblock %}

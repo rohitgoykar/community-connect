@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories - Smart Community Admin</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --light-bg: #F8F9F5;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--obsidian-black);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fade-up">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 34px; margin-bottom: 4px;">Category Taxonomy</h1>
+                <p style="color: var(--muted-text); font-size: 14px;">Distribution of broadcast notices across community operational sectors.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin" class="btn-luxury-primary" style="padding: 10px 18px; font-size: 11px;">Admin Dashboard</a>
+                <a href="/dashboard" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">Resident View</a>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+            {% for category, count in categories.items() %}
+            <div class="luxury-card card-tilt" style="padding: 28px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="font-size: 20px; margin-bottom: 4px;">🏷️ {{ category }}</h3>
+                    <p style="font-size: 12px; color: var(--muted-text);">Active Taxonomy</p>
+                </div>
+                <span class="badge-luxury badge-gold" style="font-size: 14px; padding: 6px 14px;">
+                    {{ count }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

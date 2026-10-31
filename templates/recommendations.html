@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Suggestions & Recommendations - Smart Community</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --light-bg: #F8F9F5;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--obsidian-black);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 34px; margin-bottom: 4px;">Smart AI Suggestions</h1>
+                <p style="color: var(--muted-text); font-size: 14px;">High-value community collaboration and synergy opportunities.</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">&larr; Dashboard</a>
+        </div>
+        
+        <!-- Recommendations Stream -->
+        {% if recommendations %}
+            {% for rec in recommendations %}
+            <div class="luxury-card card-tilt" style="padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <span class="badge-luxury {% if rec.type == 'help_request' %}badge-gold{% else %}badge-dark{% endif %}">
+                        {{ '🚨 Resident Needs Help' if rec.type == 'help_request' else '🤝 Potential Service Provider' }}
+                    </span>
+                    <span class="badge-luxury badge-emerald">{{ rec.match_score }}% Match Synergy</span>
+                </div>
+                
+                <div style="font-size: 15.5px; color: var(--obsidian-black); margin-bottom: 14px; padding-left: 14px; border-left: 3px solid var(--accent-gold); font-style: italic;">
+                    "{{ rec.post.description }}"
+                </div>
+                
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;">
+                    {% for reason in rec.reasons %}
+                    <span class="badge-luxury badge-dark">✦ {{ reason }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(10, 12, 16, 0.05); padding-top: 16px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 15px;">👤 {{ rec.user.name or rec.user.username }}</span>
+                        <span style="color: var(--muted-text); font-size: 13px; margin-left: 8px;">⭐ {{ "%.1f"|format(rec.user.rating or 5.0) }} &bull; Trust: {{ rec.user.trust_score }}%</span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="sendRequest({{ rec.post.id }}, {{ rec.user.id }})" class="btn-luxury-gold" style="padding: 8px 18px; font-size: 11px;">Send Request</button>
+                        <button onclick="startChat({{ rec.user.id }}, '{{ (rec.user.name or rec.user.username)|replace("'", "\\'") }}')" class="btn-luxury-primary" style="padding: 8px 18px; font-size: 11px;">🔒 Chat</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="luxury-card" style="padding: 60px 40px; text-align: center;">
+                <div style="font-size: 38px; margin-bottom: 10px;">💡</div>
+                <h3 style="font-size: 24px; margin-bottom: 6px;">No suggestions at this moment</h3>
+                <p style="color: var(--muted-text); max-width: 420px; margin: 0 auto 20px auto; font-size: 14px;">Recommendations are continuously generated as neighbors publish new requests in your sector.</p>
+                <a href="{{ url_for('create_post') }}" class="btn-luxury-gold">+ Broadcast a Notice</a>
+            </div>
+        {% endif %}
+        
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+    <script>
+        function sendRequest(postId, providerId) {
+            const message = prompt('Enter a brief message for this request:');
+            if (message === null) return;
+            
+            fetch('/send-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    post_id: postId,
+                    provider_id: providerId,
+                    message: message
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.showModernToast) showModernToast('Request dispatched successfully!', 'emerald');
+                    else alert('Request dispatched successfully!');
+                } else {
+                    if (window.showModernToast) showModernToast(data.error || 'Failed to dispatch request', 'rose');
+                    else alert(data.error || 'Failed');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function startChat(userId, userName) {
+            window.location.href = `/communication?user_id=${userId}`;
+        }
+    </script>
+</body>
+</html>

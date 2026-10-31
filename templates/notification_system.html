@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Notifications - Smart Community</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background-color: var(--bg-cream); padding: 40px 20px;">
+    <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+            <h2 style="font-size: 30px; margin: 0;">System Notifications</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn-luxury-outline" style="padding: 8px 16px; font-size: 11px;">&larr; Dashboard</a>
+        </div>
+
+        {% for notif in notifications %}
+        <div class="luxury-card card-tilt" style="padding: 24px; {% if not notif.is_read %}border-left: 4px solid var(--accent-gold);{% endif %}">
+            <div style="font-size: 15px; font-weight: 600; color: var(--obsidian-black); line-height: 1.5; margin-bottom: 8px;">
+                {{ notif.message }}
+            </div>
+            <div style="font-size: 12px; color: var(--muted-text);">
+                📅 {{ notif.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+        </div>
+        {% else %}
+        <div class="luxury-card" style="padding: 40px; text-align: center; color: var(--muted-text);">
+            <p>No notifications yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

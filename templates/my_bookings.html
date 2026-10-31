@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Service Orders &amp; Bookings — CommunityKart</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --amz-dark: #131921;
+            --amz-subnav: #232f3e;
+            --amz-accent: #febd69;
+            --amz-orange: #FF9900;
+            --fk-blue: #2874f0;
+            --fk-green: #388e3c;
+            --canvas-bg: #F1F3F6;
+            --border-color: #E0E0E0;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: var(--canvas-bg);
+            color: #111827;
+            min-height: 100vh;
+        }
+
+        .amz-header {
+            background: var(--amz-dark);
+            color: #fff;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .amz-brand {
+            text-decoration: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .amz-brand span { color: var(--amz-orange); }
+
+        .container {
+            max-width: 1040px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .order-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+        .order-card:hover {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .order-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #F3F4F6;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tracker-bar {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 18px 0;
+            position: relative;
+        }
+
+        .btn-gold {
+            background: var(--amz-accent);
+            color: #111;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            border: 1px solid #D97706;
+            cursor: pointer;
+        }
+        .btn-gold:hover { background: #f3a847; }
+        .btn-outline {
+            background: #fff;
+            color: #111;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid #D1D5DB;
+        }
+        .btn-outline:hover { background: #F9FAFB; }
+    </style>
+</head>
+<body>
+
+    <header class="amz-header">
+        <div style="display: flex; align-items: center; gap: 24px;">
+            <a href="{{ url_for('services_categories') }}" class="amz-brand">
+                Community<span>Kart</span>
+            </a>
+            <span style="font-size: 13px; color: #D1D5DB;">Your Service Orders &bull; Live Tracking</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <a href="{{ url_for('services_categories') }}" style="color: #fff; text-decoration: none; font-size: 13px; font-weight: 700;">+ Browse Services</a>
+            <a href="{{ url_for('feedback') }}" style="color: var(--amz-accent); text-decoration: none; font-size: 13px; font-weight: 700;">⭐ Reputation Hub</a>
+            <a href="{{ url_for('logout') }}" style="color: #F87171; text-decoration: none; font-size: 12px;">Sign Out</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h1 style="font-size: 26px; font-weight: 800; color: #111827;">Your Service Orders</h1>
+                <p style="font-size: 13.5px; color: #6B7280;">Real-time status tracking, technician dispatch, and mutual 2-way feedback.</p>
+            </div>
+            <a href="{{ url_for('services_categories') }}" class="btn-gold">
+                ⚡ Book Another Service
+            </a>
+        </div>
+
+        {% if bookings %}
+        <div>
+            {% for b in bookings %}
+            <div class="order-card">
+                <div class="order-head">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-family: monospace; font-size: 13.5px; font-weight: 800; background: #111827; color: #FCD34D; padding: 4px 10px; border-radius: 4px;">
+                            #{{ b.booking_code }}
+                        </span>
+                        <span style="font-size: 12.5px; color: #6B7280;">
+                            Placed on {{ b.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 20px; {% if b.status == 'Completed' %}background: #DCFCE7; color: #166534;{% elif b.status == 'Cancelled' %}background: #FEE2E2; color: #991B1B;{% else %}background: #EFF6FF; color: #1E40AF;{% endif %}">
+                            ● {{ b.status }}
+                        </span>
+                        <strong style="font-size: 20px; color: #111827;">₹{{ "%.0f"|format(b.amount) }}</strong>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 800; color: #111827; margin-bottom: 6px;">{{ b.service_title }}</h3>
+                        <div style="font-size: 13px; color: #4B5563; display: flex; flex-direction: column; gap: 4px;">
+                            <div>📍 Address: <strong>{{ b.address }}</strong></div>
+                            <div>⏱️ Scheduled Arrival: <strong style="color: #2563EB;">{{ b.time_slot }}</strong></div>
+                            <div>💳 Payment Mode: <strong>{{ b.payment_mode }}</strong></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 16px;">
+                        <div style="font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: 700;">Assigned Pro</div>
+                        <div style="font-weight: 800; font-size: 15px; color: #111827; margin-top: 2px;">{{ b.provider.name or b.provider.username }}</div>
+                        <div style="font-size: 12px; color: #D97706; margin-top: 2px;">
+                            ⭐ {{ "%.1f"|format(b.provider.rating or 5.0) }} &bull; <span style="color:#059669; font-weight:700;">{{ b.provider.trust_score }}% Trust</span>
+                        </div>
+                        {% if b.provider.contact %}
+                        <div style="font-size: 12px; color: #4B5563; margin-top: 4px;">📞 {{ b.provider.contact }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Live Status Progress Tracker -->
+                <div class="tracker-bar">
+                    <div style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: #6B7280; margin-bottom: 12px;">Amazon Live Status Tracker</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+                        <div style="position: absolute; top: 12px; left: 6%; right: 6%; height: 3px; background: #E2E8F0; z-index: 1;"></div>
+                        <div style="position: absolute; top: 12px; left: 6%; width: {% if b.status == 'Completed' %}88%{% elif b.status == 'In Progress' %}58%{% elif b.status == 'Dispatched' %}28%{% else %}8%{% endif %}; height: 3px; background: #16A34A; z-index: 2; transition: width 0.3s;"></div>
+
+                        <div style="text-align: center; z-index: 3;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px;">✓</div>
+                            <span style="font-size: 11px; font-weight: 700;">Booked</span>
+                        </div>
+                        <div style="text-align: center; z-index: 3;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: {% if b.status in ['Dispatched', 'In Progress', 'Completed'] %}#16A34A{% else %}#E2E8F0{% endif %}; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px;">
+                                {{ '✓' if b.status in ['Dispatched', 'In Progress', 'Completed'] else '2' }}
+                            </div>
+                            <span style="font-size: 11px; font-weight: 700; color: {% if b.status in ['Dispatched', 'In Progress', 'Completed'] %}#111{% else %}#9CA3AF{% endif %};">Dispatched</span>
+                        </div>
+                        <div style="text-align: center; z-index: 3;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: {% if b.status in ['In Progress', 'Completed'] %}#16A34A{% else %}#E2E8F0{% endif %}; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px;">
+                                {{ '✓' if b.status in ['In Progress', 'Completed'] else '3' }}
+                            </div>
+                            <span style="font-size: 11px; font-weight: 700; color: {% if b.status in ['In Progress', 'Completed'] %}#111{% else %}#9CA3AF{% endif %};">Active</span>
+                        </div>
+                        <div style="text-align: center; z-index: 3;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: {% if b.status == 'Completed' %}#16A34A{% else %}#E2E8F0{% endif %}; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px;">
+                                {{ '✓' if b.status == 'Completed' else '4' }}
+                            </div>
+                            <span style="font-size: 11px; font-weight: 700; color: {% if b.status == 'Completed' %}#111{% else %}#9CA3AF{% endif %};">Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                    <a href="{{ url_for('chat') }}?user_id={{ b.provider_id }}" class="btn-outline">
+                        💬 Message Pro
+                    </a>
+                    <a href="{{ url_for('feedback') }}?user_id={{ b.provider_id }}" class="btn-gold">
+                        ⭐ Rate &amp; Review Technician
+                    </a>
+                    {% if b.status != 'Completed' and b.status != 'Cancelled' %}
+                    <form action="{{ url_for('update_booking_status') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="booking_id" value="{{ b.id }}">
+                        <input type="hidden" name="status" value="Completed">
+                        <button type="submit" style="padding: 8px 16px; font-size: 13px; border-radius: 6px; border: 1.5px solid #16A34A; background: #F0FDF4; color: #16A34A; font-weight: 700; cursor: pointer;">
+                            ✓ Mark Done
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="background: #fff; padding: 60px 20px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; color: #6B7280;">
+            <div style="font-size: 48px; margin-bottom: 10px;">📦</div>
+            <h3 style="font-size: 20px; color: #111827; margin-bottom: 6px;">No Service Orders Yet</h3>
+            <p style="font-size: 14px; max-width: 420px; margin: 0 auto 20px;">
+                Find trusted local electricians, plumbers, and home cleaners with guaranteed honest pricing.
+            </p>
+            <a href="{{ url_for('services_categories') }}" class="btn-gold" style="padding: 12px 24px; font-size: 14px;">
+                Explore Services Marketplace &rarr;
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

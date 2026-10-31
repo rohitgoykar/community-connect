@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Matches{% endblock %}
+
+{% block content %}
+<style>
+    .matches-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .matches-header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .match-item {
+        background-color: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 28px;
+        margin-bottom: 20px;
+        transition: var(--transition-smooth);
+        display: grid;
+        grid-template-columns: 1fr 220px;
+        gap: 30px;
+        position: relative;
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    .match-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--accent-gold-light), var(--accent-gold));
+        border-radius: 4px 0 0 4px;
+    }
+
+    .match-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(10, 12, 16, 0.07);
+        border-color: rgba(197, 160, 89, 0.4);
+    }
+
+    .match-user-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #0A0C10;
+        margin-bottom: 8px;
+    }
+
+    .match-progress-container {
+        background-color: #F4F5EF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 20px;
+        height: 22px;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        overflow: hidden;
+        margin: 10px 0 14px 0;
+    }
+
+    .match-progress-fill {
+        background: linear-gradient(90deg, #5E5332, #C5A059);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 14px;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: width 1s ease;
+    }
+
+    .match-reasons {
+        background: #F8F9F5;
+        padding: 14px 18px;
+        border-left: 3px solid #C5A059;
+        border-radius: 0 4px 4px 0;
+        margin: 12px 0;
+    }
+
+    .reasons-list {
+        list-style: none;
+        padding-left: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: 0;
+    }
+
+    .reasons-list li {
+        font-size: 13px;
+        color: #0A0C10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .reasons-list li::before {
+        content: '✦';
+        color: #C5A059;
+        font-size: 11px;
+    }
+
+    @media (max-width: 768px) {
+        .match-item {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="matches-container">
+    <div class="matches-header-box">
+        <div>
+            <h2 style="font-size: 34px; margin-bottom: 4px;">Smart AI Matches</h2>
+            <p style="color: var(--muted-text); font-size: 14px;">Instant synergy calculations matching resident requests, skills, and locality.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('create_post') }}" class="btn-luxury-gold" style="padding: 10px 18px; font-size: 11px;">+ Create Post</a>
+            <a href="{{ url_for('dashboard') }}" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Live Filter Input -->
+    <div style="margin-bottom: 25px;">
+        <input type="text" class="form-control-modern" placeholder="🔍 Search matches by neighbor name, skills, category or locality..." data-live-filter=".match-item">
+    </div>
+    
+    <!-- Outgoing Matches - People who can help your posts -->
+    {% if post_matches %}
+    <div class="luxury-card" style="margin-bottom: 35px;">
+        <div style="padding: 22px 28px; background: #F8F9F5; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🤝</span>
+            <h4 style="font-size: 20px; margin: 0; font-weight: 700;">Neighbors who can assist with your posts ({{ post_matches|length }})</h4>
+        </div>
+        <div style="padding: 25px;">
+            {% for match in post_matches %}
+            <div class="match-item card-tilt" data-user-id="{{ match.user.id }}">
+                <div>
+                    <h5 class="match-user-title">{{ match.user.name or match.user.username }}</h5>
+                    
+                    <div class="match-progress-container">
+                        <div class="match-progress-fill" style="width: {{ match.match_score }}%">
+                            Fit Score: {{ match.match_score }}%
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: var(--obsidian-black); line-height: 1.5; margin-bottom: 8px;">
+                        <b>Referenced Post:</b> "{{ match.post.description[:160] }}..."
+                    </p>
+                    
+                    <div class="match-reasons">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 4px;">Synergy Breakdown</div>
+                        <ul class="reasons-list">
+                            {% for reason in match.match_reasons %}
+                            <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    {% if match.rate_per_hour %}
+                    <div style="display: flex; gap: 14px; margin: 10px 0; background: #FAF6EE; border: 1px solid rgba(197, 160, 89, 0.35); padding: 8px 14px; border-radius: 6px; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 13px; font-weight: 700; color: #997328;">
+                            💰 Rate: ₹{{ "%.0f"|format(match.rate_per_hour) }} / hr
+                        </span>
+                        {% if match.rate_per_visit %}
+                        <span style="font-size: 13px; font-weight: 700; color: #0A0C10;">
+                            &bull; Visit: ₹{{ "%.0f"|format(match.rate_per_visit) }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                        <span class="badge-luxury badge-dark">📍 {{ match.user.location or 'Locality not set' }}</span>
+                        {% if match.user.blood_group %}
+                        <span class="badge-luxury badge-rose">🩸 {{ match.user.blood_group }}</span>
+                        {% endif %}
+                        <span class="badge-luxury badge-gold">Trust Score: {{ match.user.trust_score }}%</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; justify-content: center; gap: 8px;">
+                    <button onclick="startChat({{ match.user.id }}, '{{ match.user.name or match.user.username }}')" class="btn-luxury-primary" style="width: 100%; padding: 12px; font-size: 11.5px;">
+                        💬 Private Chat
+                    </button>
+                    {% if match.contact or match.user.contact %}
+                    <a href="tel:{{ match.contact or match.user.contact }}" class="btn-luxury-outline" style="width: 100%; padding: 9px; font-size: 11px; text-align: center; text-decoration: none; border-color: #2E7D32; color: #2E7D32;">
+                        📞 Call {{ match.contact or match.user.contact }}
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('view_profile_route', user_id=match.user.id) }}" class="btn-luxury-outline" style="width: 100%; padding: 9px; font-size: 11px; text-align: center;">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Incoming Matches - Posts that match your profile -->
+    {% if profile_matches %}
+    <div class="luxury-card" style="margin-bottom: 35px;">
+        <div style="padding: 22px 28px; background: #F8F9F5; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🎯</span>
+            <h4 style="font-size: 20px; margin: 0; font-weight: 700;">Notices where you can provide help ({{ profile_matches|length }})</h4>
+        </div>
+        <div style="padding: 25px;">
+            {% for match in profile_matches %}
+            <div class="match-item card-tilt" data-user-id="{{ match.post_creator.id }}">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h5 class="match-user-title">{{ match.post_creator.name or match.post_creator.username }}</h5>
+                        <span style="font-size: 12px; color: var(--muted-text); font-weight: 500;">📅 {{ match.post.timestamp.strftime('%B %d') }}</span>
+                    </div>
+                    
+                    <div class="match-progress-container">
+                        <div class="match-progress-fill" style="width: {{ match.match_score }}%">
+                            Fit Score: {{ match.match_score }}%
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: var(--obsidian-black); line-height: 1.5; margin-bottom: 8px;">
+                        <b>Notice:</b> "{{ match.post.description[:160] }}..."
+                    </p>
+                    
+                    <div class="match-reasons">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 4px;">Matching Criteria</div>
+                        <ul class="reasons-list">
+                            {% for reason in match.match_reasons %}
+                            <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                        <span class="badge-luxury badge-dark">{{ match.post.category }}</span>
+                        <span class="badge-luxury badge-gold">{{ match.post.intent }}</span>
+                        {% if match.post.location %}
+                        <span class="badge-luxury badge-emerald">📍 {{ match.post.location }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; justify-content: center; gap: 10px;">
+                    <button onclick="startChat({{ match.post_creator.id }}, '{{ match.post_creator.name or match.post_creator.username }}')" class="btn-luxury-primary" style="width: 100%; padding: 12px; font-size: 11.5px;">
+                        💬 Private Chat
+                    </button>
+                    <a href="{{ url_for('view_profile_route', user_id=match.post_creator.id) }}" class="btn-luxury-outline" style="width: 100%; padding: 10px; font-size: 11px;">
+                        View Profile
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Empty Fallback view -->
+    {% if not post_matches and not profile_matches %}
+    <div class="luxury-card" style="padding: 60px 40px; text-align: center;">
+        <div style="font-size: 42px; margin-bottom: 12px;">🔍</div>
+        <h3 style="font-size: 26px; margin-bottom: 8px;">No active matches calculated yet</h3>
+        <p style="color: var(--muted-text); font-size: 14.5px; max-width: 520px; margin: 0 auto 24px auto;">
+            Our algorithm matches your profile skills, location, and broadcasts against neighborhood activity. Try creating a post or enriching your profile skills!
+        </p>
+        <div style="display: flex; justify-content: center; gap: 14px;">
+            <a href="{{ url_for('profile_setup') }}" class="btn-luxury-gold">Enrich Profile</a>
+            <a href="{{ url_for('create_post') }}" class="btn-luxury-primary">+ Post a Notice</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function startChat(userId, userName) {
+    window.location.href = `/communication?user_id=${userId}`;
+}
+</script>
+{% endblock %}

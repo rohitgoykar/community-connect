@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Smart Community Admin</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --light-bg: #F8F9F5;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--obsidian-black);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #FFFFFF;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(10, 12, 16, 0.06);
+            font-size: 13.5px;
+        }
+
+        th {
+            background-color: var(--obsidian-black);
+            color: var(--primary-white);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        tr:hover {
+            background: #FAFAF8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fade-up">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 34px; margin-bottom: 4px;">User Directory & Credentials</h1>
+                <p style="color: var(--muted-text); font-size: 14px;">Activate, deactivate, and monitor registered district resident profiles.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin" class="btn-luxury-primary" style="padding: 10px 18px; font-size: 11px;">Admin Dashboard</a>
+                <a href="/dashboard" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">Resident View</a>
+            </div>
+        </div>
+
+        <!-- Filter Input -->
+        <input type="text" class="form-control-modern" placeholder="🔍 Search residents by username, name, email or locality..." data-live-filter="#usersTable tbody tr">
+
+        <!-- Table Card -->
+        <div class="luxury-card" style="padding: 0; overflow: hidden;">
+            <div style="overflow-x: auto;">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Sector</th>
+                            <th>Rating</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>#{{ user.id }}</td>
+                            <td><b>@{{ user.username }}</b></td>
+                            <td>{{ user.name or 'Not set' }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>📍 {{ user.location or 'Not set' }}</td>
+                            <td>⭐ {{ "%.1f"|format(user.rating or 5.0) }}</td>
+                            <td>
+                                <span class="badge-luxury {% if user.is_active %}badge-emerald{% else %}badge-rose{% endif %}">
+                                    {{ 'Active' if user.is_active else 'Deactivated' }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/admin/toggle-user/{{ user.id }}" class="btn-luxury-outline" style="padding: 6px 14px; font-size: 11px;">
+                                    {{ 'Deactivate' if user.is_active else 'Activate' }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

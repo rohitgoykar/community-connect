@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+{% block title %}Request a Service - Smart Community{% endblock %}
+
+{% block content %}
+<style>
+    .service-req-wrapper {
+        max-width: 860px;
+        margin: 0 auto;
+        padding-bottom: 60px;
+    }
+
+    .service-req-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 0 30px rgba(197, 160, 89, 0.12);
+        overflow: hidden;
+        position: relative;
+    }
+
+    [data-theme="dark"] .service-req-card {
+        background: rgba(18, 22, 31, 0.92);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgba(245, 158, 11, 0.15);
+    }
+
+    /* Card Header */
+    .service-req-header {
+        background: linear-gradient(135deg, #0A0C10 0%, #1A2232 100%);
+        padding: 36px 40px;
+        color: #FFFFFF;
+        position: relative;
+    }
+
+    [data-theme="dark"] .service-req-header {
+        background: linear-gradient(135deg, #050608 0%, #111724 100%);
+    }
+
+    .service-req-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5E5332, #C5A059, #38BDF8, #5E5332);
+    }
+
+    .header-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(197, 160, 89, 0.2);
+        border: 1px solid rgba(197, 160, 89, 0.45);
+        color: #C5A059;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    .service-req-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        color: #FFFFFF;
+        margin: 0 0 8px 0;
+        font-weight: 700;
+    }
+
+    .service-req-header p {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* Card Body & Form Elements */
+    .service-req-body {
+        padding: 40px;
+    }
+
+    .form-step-group {
+        margin-bottom: 28px;
+    }
+
+    .field-label-styled {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #0A0C10;
+        text-transform: uppercase;
+    }
+
+    [data-theme="dark"] .field-label-styled {
+        color: #F1F5F9;
+    }
+
+    .field-label-styled .req-asterisk {
+        color: #EF4444;
+        margin-left: 2px;
+    }
+
+    .field-label-styled small {
+        font-size: 11.5px;
+        font-weight: 500;
+        color: #C5A059;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .input-luxury, .select-luxury, .textarea-luxury {
+        width: 100%;
+        padding: 13px 18px;
+        border: 1.5px solid rgba(10, 12, 16, 0.14);
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        background: #F8F9F5;
+        color: #0A0C10;
+        outline: none;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] .input-luxury,
+    [data-theme="dark"] .select-luxury,
+    [data-theme="dark"] .textarea-luxury {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #FFFFFF;
+    }
+
+    .input-luxury:focus, .select-luxury:focus, .textarea-luxury:focus {
+        border-color: #C5A059 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.22), 0 0 20px rgba(197, 160, 89, 0.15) !important;
+    }
+
+    [data-theme="dark"] .input-luxury:focus,
+    [data-theme="dark"] .select-luxury:focus,
+    [data-theme="dark"] .textarea-luxury:focus {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: #F59E0B !important;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 0 20px rgba(245, 158, 11, 0.18) !important;
+    }
+
+    .textarea-luxury {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+
+    /* Two-column layout */
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        margin-bottom: 28px;
+    }
+
+    /* Dynamic Service Suggestions Chips */
+    .suggestions-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 9px;
+    }
+
+    .suggest-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 13px;
+        background: rgba(197, 160, 89, 0.12);
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        color: #5E5332;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    [data-theme="dark"] .suggest-chip {
+        background: rgba(245, 158, 11, 0.15);
+        border-color: rgba(245, 158, 11, 0.35);
+        color: #FBBF24;
+    }
+
+    .suggest-chip:hover {
+        background: #0A0C10;
+        border-color: #0A0C10;
+        color: #FFFFFF;
+        transform: translateY(-2px);
+    }
+
+    [data-theme="dark"] .suggest-chip:hover {
+        background: #F59E0B;
+        border-color: #F59E0B;
+        color: #0A0C10;
+    }
+
+    /* Option Pill Groups (Radio buttons) */
+    .option-pills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .pill-radio-card {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .pill-radio-card input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .pill-card-inner {
+        padding: 13px 14px;
+        border: 1.5px solid rgba(10, 12, 16, 0.12);
+        border-radius: 8px;
+        background: #F8F9F5;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #0A0C10;
+        transition: all 0.22s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 52px;
+    }
+
+    [data-theme="dark"] .pill-card-inner {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #E2E8F0;
+    }
+
+    .pill-radio-card:hover .pill-card-inner {
+        border-color: #C5A059;
+        transform: translateY(-2px);
+    }
+
+    .pill-radio-card input[type="radio"]:checked + .pill-card-inner {
+        border-color: #C5A059;
+        background: #FFFFFF;
+        color: #0A0C10;
+        box-shadow: 0 0 0 2px #C5A059, 0 6px 18px rgba(197, 160, 89, 0.22);
+    }
+
+    [data-theme="dark"] .pill-radio-card input[type="radio"]:checked + .pill-card-inner {
+        border-color: #F59E0B;
+        background: rgba(245, 158, 11, 0.16);
+        color: #FFFFFF;
+        box-shadow: 0 0 0 2px #F59E0B, 0 6px 18px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Urgency Special Styling */
+    .urgency-emergency input[type="radio"]:checked + .pill-card-inner {
+        border-color: #EF4444 !important;
+        box-shadow: 0 0 0 2px #EF4444, 0 6px 18px rgba(239, 68, 68, 0.25) !important;
+        background: rgba(239, 68, 68, 0.12) !important;
+        color: #DC2626 !important;
+    }
+
+    /* Submit Button */
+    .btn-submit-service {
+        width: 100%;
+        background: #0A0C10;
+        color: #FFFFFF;
+        border: 1px solid #0A0C10;
+        padding: 18px 30px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        margin-top: 10px;
+    }
+
+    .btn-submit-service:hover {
+        background: #C5A059;
+        border-color: #C5A059;
+        color: #0A0C10;
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(197, 160, 89, 0.38);
+    }
+
+    [data-theme="dark"] .btn-submit-service {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: #0A0C10;
+        border: none;
+    }
+
+    [data-theme="dark"] .btn-submit-service:hover {
+        background: linear-gradient(135deg, #FBBF24, #F59E0B);
+        box-shadow: 0 14px 34px rgba(245, 158, 11, 0.45);
+    }
+
+    @media (max-width: 720px) {
+        .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
+        .service-req-body { padding: 26px 20px; }
+        .service-req-header { padding: 26px 20px; }
+        .option-pills-grid { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+
+<div class="service-req-wrapper">
+    <div class="service-req-card card-tilt">
+        
+        <!-- Header -->
+        <div class="service-req-header">
+            <div class="header-badge-pill">
+                <span>✦</span> Verified Community Marketplace
+            </div>
+            <h1>Request a Service</h1>
+            <p>Fill in your requirements to find a suitable service provider.</p>
+        </div>
+
+        <!-- Form Body -->
+        <div class="service-req-body">
+            <form method="POST" action="{{ url_for('request_service') }}" id="serviceRequestForm">
+
+                <!-- 1. Select Service Category * -->
+                <div class="form-step-group">
+                    <label class="field-label-styled" for="service_category">
+                        <span>1. Select Service Category <span class="req-asterisk">*</span></span>
+                        <small>Choose trade to match verified professionals</small>
+                    </label>
+                    <select name="service_category" id="service_category" class="select-luxury" onchange="onCategoryChanged()" required>
+                        <option value="Plumbing" {% if selected_category == 'Plumbing' %}selected{% endif %}>🔧 Plumbing (Pipe leaks, tap repair, bathroom & drainage)</option>
+                        <option value="Electrician" {% if selected_category == 'Electrical / Electrician' or selected_category == 'Electrician' %}selected{% endif %}>⚡ Electrician (Wiring, switchboards, MCB, inverter, lighting)</option>
+                        <option value="Cleaning & Housekeeping" {% if selected_category == 'Cleaning & Housekeeping' %}selected{% endif %}>🧹 Cleaning & Housekeeping (Home, bathroom, sofa, deep clean)</option>
+                        <option value="AC Servicing & Repair" {% if selected_category == 'AC Servicing & Repair' %}selected{% endif %}>❄️ AC Servicing & Repair (Gas refill, cooling, installation)</option>
+                        <option value="Carpentry & Woodwork" {% if selected_category == 'Carpentry & Woodwork' %}selected{% endif %}>🪚 Carpentry & Woodwork (Furniture, doors, locks, repairs)</option>
+                        <option value="Painting & Waterproofing" {% if selected_category == 'Painting & Waterproofing' %}selected{% endif %}>🎨 Painting & Waterproofing (Interior, exterior, texture)</option>
+                        <option value="Masonry & Renovation" {% if selected_category == 'Masonry & Renovation' %}selected{% endif %}>🧱 Masonry & Renovation (Tiles, cement work, plastering)</option>
+                        <option value="Cook & Catering" {% if selected_category == 'Cook & Catering' %}selected{% endif %}>👨‍🍳 Cook & Catering (Daily home meals, party catering)</option>
+                        <option value="Driver & Chauffeur" {% if selected_category == 'Driver & Chauffeur' %}selected{% endif %}>🚗 Driver & Chauffeur (Personal, outstation, temporary)</option>
+                        <option value="Gardening & Lawn Care" {% if selected_category == 'Gardening & Lawn Care' %}selected{% endif %}>🌿 Gardening & Lawn Care (Lawn maintenance, trimming)</option>
+                        <option value="Security & Guard" {% if selected_category == 'Security & Guard' %}selected{% endif %}>💂 Security & Guard (Residential & commercial security)</option>
+                        <option value="Tailoring & Alterations" {% if selected_category == 'Tailoring & Alterations' %}selected{% endif %}>✂️ Tailoring & Alterations (Clothes fitting & stitching)</option>
+                        <option value="Home Tutoring" {% if selected_category == 'Home Tutoring' %}selected{% endif %}>📚 Home Tutoring (School subjects & coaching)</option>
+                        <option value="Nursing & Elder Care" {% if selected_category == 'Nursing & Elder Care' %}selected{% endif %}>🏥 Nursing & Elder Care (Patient assistance, caretaker)</option>
+                        <option value="Other Skilled Service" {% if selected_category == 'Other Skilled Service' %}selected{% endif %}>🛠️ Other Skilled Service</option>
+                    </select>
+                </div>
+
+                <!-- 2. Required Service * -->
+                <div class="form-step-group">
+                    <label class="field-label-styled" for="required_service">
+                        <span>2. Required Service <span class="req-asterisk">*</span></span>
+                        <small>Click a quick suggestion or type your specific requirement</small>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="required_service" 
+                        name="required_service" 
+                        class="input-luxury" 
+                        placeholder="e.g. Tap repair, water leakage inspection, pipe fitting" 
+                        required
+                    >
+                    <div class="suggestions-container" id="suggestionsContainer">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- 3. Your Full Name * & 4. Mobile Number * -->
+                <div class="form-grid-2">
+                    <div class="form-step-group" style="margin-bottom: 0;">
+                        <label class="field-label-styled" for="full_name">
+                            <span>3. Your Full Name <span class="req-asterisk">*</span></span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="full_name" 
+                            name="full_name" 
+                            class="input-luxury" 
+                            value="{{ user.name or user.username if user else '' }}" 
+                            placeholder="Enter your full name" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-step-group" style="margin-bottom: 0;">
+                        <label class="field-label-styled" for="mobile_number">
+                            <span>4. Mobile Number <span class="req-asterisk">*</span></span>
+                            <small>10-digit mobile number</small>
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="mobile_number" 
+                            name="mobile_number" 
+                            class="input-luxury" 
+                            value="{{ user.contact if user and user.contact else '' }}" 
+                            placeholder="e.g. 9876543210" 
+                            pattern="[0-9]{10}" 
+                            maxlength="10" 
+                            title="Please enter a valid 10-digit mobile number"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- 5. Service Location * & 6. Preferred Service Date -->
+                <div class="form-grid-2">
+                    <div class="form-step-group" style="margin-bottom: 0;">
+                        <label class="field-label-styled" for="service_location">
+                            <span>5. Service Location <span class="req-asterisk">*</span></span>
+                            <small>Area / Colony / Sangamner</small>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="service_location" 
+                            name="service_location" 
+                            class="input-luxury" 
+                            value="{{ user.location or 'Sangamner' if user else 'Sangamner' }}" 
+                            placeholder="e.g. Sangamner, Shivaji Nagar" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-step-group" style="margin-bottom: 0;">
+                        <label class="field-label-styled" for="preferred_date">
+                            <span>6. Preferred Service Date</span>
+                            <small>Optional</small>
+                        </label>
+                        <input 
+                            type="date" 
+                            id="preferred_date" 
+                            name="preferred_date" 
+                            class="input-luxury" 
+                            placeholder="Choose date"
+                        >
+                    </div>
+                </div>
+
+                <!-- 7. Expected Budget -->
+                <div class="form-step-group">
+                    <label class="field-label-styled">
+                        <span>7. Expected Budget</span>
+                        <small>Select anticipated range</small>
+                    </label>
+                    <div class="option-pills-grid">
+                        <label class="pill-radio-card">
+                            <input type="radio" name="expected_budget" value="Below ₹500">
+                            <div class="pill-card-inner">
+                                <span>Below ₹500</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="expected_budget" value="₹500–₹1,000">
+                            <div class="pill-card-inner">
+                                <span>₹500–₹1,000</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="expected_budget" value="₹1,000–₹5,000">
+                            <div class="pill-card-inner">
+                                <span>₹1,000–₹5,000</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="expected_budget" value="Above ₹5,000">
+                            <div class="pill-card-inner">
+                                <span>Above ₹5,000</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="expected_budget" value="Need provider quotation" checked>
+                            <div class="pill-card-inner">
+                                <span>Need provider quotation</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 8. How urgently do you need the service? -->
+                <div class="form-step-group">
+                    <label class="field-label-styled">
+                        <span>8. How urgently do you need the service?</span>
+                        <small>Priority level</small>
+                    </label>
+                    <div class="option-pills-grid">
+                        <label class="pill-radio-card urgency-emergency">
+                            <input type="radio" name="urgency" value="Emergency">
+                            <div class="pill-card-inner">
+                                <span>🚨 Emergency</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="urgency" value="Within 24 hours">
+                            <div class="pill-card-inner">
+                                <span>⚡ Within 24 hours</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="urgency" value="Normal" checked>
+                            <div class="pill-card-inner">
+                                <span>🕒 Normal</span>
+                            </div>
+                        </label>
+                        <label class="pill-radio-card">
+                            <input type="radio" name="urgency" value="Flexible date">
+                            <div class="pill-card-inner">
+                                <span>🗓️ Flexible date</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 9. Describe Your Requirement -->
+                <div class="form-step-group">
+                    <label class="field-label-styled" for="describe_requirement">
+                        <span>9. Describe Your Requirement</span>
+                        <small>Provide problem details or special instructions</small>
+                    </label>
+                    <textarea 
+                        id="describe_requirement" 
+                        name="describe_requirement" 
+                        class="textarea-luxury" 
+                        placeholder="Please describe your requirement in detail (e.g. bathroom tap leaking continuously, main water valve issue, need plumber with spare parts)..."
+                    ></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div style="margin-top: 32px;">
+                    <button type="submit" class="btn-submit-service btn-luxury-primary">
+                        <span>Submit Service Request &rarr;</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Category to Service Suggestions mapping
+    const SERVICE_SUGGESTIONS = {
+        "Plumbing": [
+            "Tap Leakage & Repair",
+            "Water Pipe Leakage",
+            "Bathroom & Sanitary Fitting",
+            "Water Tank Cleaning & Repair",
+            "Drainage Blockage Clearing",
+            "New Pipeline Installation",
+            "Geyser Pipeline Fitting"
+        ],
+        "Electrician": [
+            "Switchboard & Socket Repair",
+            "Ceiling Fan Installation / Repair",
+            "Short Circuit & Fuse Tripping",
+            "Inverter & Battery Wiring",
+            "Complete Home Electrical Wiring",
+            "LED Lighting & Fixture Setup"
+        ],
+        "Cleaning & Housekeeping": [
+            "Deep Home Cleaning (Full House)",
+            "Bathroom & Toilet Deep Clean",
+            "Kitchen Deep Cleaning & Degreasing",
+            "Sofa & Carpet Foam Wash",
+            "Window Glass & Balcony Cleaning"
+        ],
+        "AC Servicing & Repair": [
+            "Split / Window AC Servicing",
+            "AC Gas Refilling & Leak Test",
+            "AC Not Cooling Properly",
+            "New AC Installation / Uninstallation",
+            "Water Dripping From AC"
+        ],
+        "Carpentry & Woodwork": [
+            "Door Lock / Handle Repair",
+            "Modular Kitchen Hinge Repair",
+            "Custom Bed / Cupboard Work",
+            "Furniture Polishing & Varnishing",
+            "Wooden Window & Mesh Repair"
+        ],
+        "Painting & Waterproofing": [
+            "Interior Wall Fresh Painting",
+            "Exterior Weatherproof Painting",
+            "Ceiling & Wall Leakage Waterproofing",
+            "Putty, Primer & Texture Finish"
+        ],
+        "Masonry & Renovation": [
+            "Floor / Wall Tile Replacement",
+            "Wall Plastering & Crack Repair",
+            "Cement & Brickwork Construction",
+            "Kitchen Platform Renovation"
+        ],
+        "Cook & Catering": [
+            "Daily Household Cook (Lunch & Dinner)",
+            "Special Occasion / Party Catering",
+            "Dietary / Veg Specialist Chef"
+        ],
+        "Driver & Chauffeur": [
+            "Personal Chauffeur (Daily)",
+            "Outstation Trip Driver",
+            "Hourly / Night Driver"
+        ],
+        "Gardening & Lawn Care": [
+            "Lawn Grass Mowing & Pruning",
+            "Potted Plant Care & Soil Change",
+            "Garden Landscaping & Fertilizer"
+        ],
+        "Security & Guard": [
+            "Residential Gatekeeper Guard",
+            "Event Security Bouncer",
+            "Night Watchman Duty"
+        ],
+        "Tailoring & Alterations": [
+            "Suit & Dress Stitching",
+            "Curtain & Cushion Alterations",
+            "Cloth Repair & Fitting"
+        ],
+        "Home Tutoring": [
+            "Primary School All Subjects",
+            "High School Math & Science",
+            "Spoken English Coaching"
+        ],
+        "Nursing & Elder Care": [
+            "Elderly Care Companion",
+            "Post-Surgery Bedside Nursing",
+            "Baby Caregiver / Nanny"
+        ],
+        "Other Skilled Service": [
+            "Appliance Repair",
+            "Welding & Fabrication Work",
+            "Pest Control Treatment"
+        ]
+    };
+
+    function onCategoryChanged() {
+        const catSelect = document.getElementById('service_category');
+        const selectedVal = catSelect.value;
+        const suggestions = SERVICE_SUGGESTIONS[selectedVal] || SERVICE_SUGGESTIONS["Plumbing"];
+        const container = document.getElementById('suggestionsContainer');
+        const reqInput = document.getElementById('required_service');
+
+        container.innerHTML = '';
+        suggestions.forEach(item => {
+            const chip = document.createElement('span');
+            chip.className = 'suggest-chip';
+            chip.innerHTML = `<span>+</span> ${item}`;
+            chip.onclick = function() {
+                reqInput.value = item;
+                reqInput.focus();
+            };
+            container.appendChild(chip);
+        });
+
+        // Set intelligent placeholder
+        if (suggestions.length > 0) {
+            reqInput.placeholder = `e.g. ${suggestions[0]}, ${suggestions[1]}`;
+        }
+    }
+
+    // Initialize suggestions and set min date on load
+    document.addEventListener('DOMContentLoaded', () => {
+        onCategoryChanged();
+
+        // Set min date to today for Preferred Service Date
+        const dateInput = document.getElementById('preferred_date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+        }
+    });
+</script>
+{% endblock %}

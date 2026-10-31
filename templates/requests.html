@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Requests - Smart Community</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --light-bg: #F8F9F5;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--obsidian-black);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted-text);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn.active {
+            color: var(--obsidian-black);
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 34px; margin-bottom: 4px;">Service & Request Manager</h1>
+                <p style="color: var(--muted-text); font-size: 14px;">Review incoming neighbor requests and track your outbound inquiries.</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">&larr; Dashboard</a>
+        </div>
+        
+        <!-- Tabs -->
+        <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border-color);">
+            <button class="tab-btn active" onclick="switchTab('received', this)">Received Requests ({{ received_requests|length if received_requests else 0 }})</button>
+            <button class="tab-btn" onclick="switchTab('sent', this)">Sent Requests ({{ sent_requests|length if sent_requests else 0 }})</button>
+        </div>
+        
+        <!-- Received Tab -->
+        <div id="received" class="tab-content active">
+            {% if received_requests %}
+                {% for req in received_requests %}
+                <div class="luxury-card card-tilt" id="request-{{ req.id }}" style="padding: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 700; font-size: 16px;">From: 👤 {{ req.requester.name or req.requester.username }}</span>
+                        <span class="badge-luxury {% if req.status == 'accepted' %}badge-emerald{% elif req.status == 'pending' %}badge-gold{% elif req.status == 'rejected' %}badge-rose{% else %}badge-dark{% endif %}">
+                            Status: {{ req.status|upper }}
+                        </span>
+                    </div>
+
+                    {% if req.post %}
+                    <p style="font-size: 14px; color: var(--muted-text); margin-bottom: 8px;">
+                        <b>Notice:</b> "{{ req.post.description[:150] }}..."
+                    </p>
+                    {% endif %}
+
+                    {% if req.message %}
+                    <div style="background: #F8F9F5; border-left: 3px solid var(--accent-gold); padding: 10px 16px; margin: 10px 0; font-size: 13.5px; font-style: italic;">
+                        "{{ req.message }}"
+                    </div>
+                    {% endif %}
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(10, 12, 16, 0.05); padding-top: 14px; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+                        <span style="font-size: 12px; color: var(--muted-text);">📅 {{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            {% if req.status == 'pending' %}
+                            <button class="btn-luxury-emerald" style="padding: 8px 16px; font-size: 11px;" onclick="updateRequest({{ req.id }}, 'accepted')">Accept</button>
+                            <button class="btn-luxury-rose" style="padding: 8px 16px; font-size: 11px;" onclick="updateRequest({{ req.id }}, 'rejected')">Decline</button>
+                            {% elif req.status == 'accepted' %}
+                            <button class="btn-luxury-primary" style="padding: 8px 16px; font-size: 11px;" onclick="updateRequest({{ req.id }}, 'completed')">Mark Complete</button>
+                            <button class="btn-luxury-gold" style="padding: 8px 16px; font-size: 11px;" onclick="startChat({{ req.requester.id }}, '{{ req.requester.name or req.requester.username }}')">Message</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="luxury-card" style="padding: 50px 30px; text-align: center;">
+                    <div style="font-size: 34px; margin-bottom: 8px;">📥</div>
+                    <h3 style="font-size: 22px;">No incoming requests</h3>
+                    <p style="color: var(--muted-text); font-size: 14px;">When neighbors connect regarding your posts, they will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sent Tab -->
+        <div id="sent" class="tab-content">
+            {% if sent_requests %}
+                {% for req in sent_requests %}
+                <div class="luxury-card card-tilt" style="padding: 28px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 700; font-size: 16px;">To: 👤 {{ req.provider.name or req.provider.username }}</span>
+                        <span class="badge-luxury {% if req.status == 'accepted' %}badge-emerald{% elif req.status == 'pending' %}badge-gold{% elif req.status == 'rejected' %}badge-rose{% else %}badge-dark{% endif %}">
+                            Status: {{ req.status|upper }}
+                        </span>
+                    </div>
+
+                    {% if req.post %}
+                    <p style="font-size: 14px; color: var(--muted-text); margin-bottom: 8px;">
+                        <b>Target Notice:</b> "{{ req.post.description[:150] }}..."
+                    </p>
+                    {% endif %}
+
+                    {% if req.message %}
+                    <div style="background: #F8F9F5; border-left: 3px solid var(--accent-gold); padding: 10px 16px; margin: 10px 0; font-size: 13.5px; font-style: italic;">
+                        "{{ req.message }}"
+                    </div>
+                    {% endif %}
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(10, 12, 16, 0.05); padding-top: 14px; margin-top: 10px;">
+                        <span style="font-size: 12px; color: var(--muted-text);">📅 {{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <button class="btn-luxury-primary" style="padding: 8px 16px; font-size: 11px;" onclick="startChat({{ req.provider.id }}, '{{ req.provider.name or req.provider.username }}')">Message</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="luxury-card" style="padding: 50px 30px; text-align: center;">
+                    <div style="font-size: 34px; margin-bottom: 8px;">📤</div>
+                    <h3 style="font-size: 22px;">No sent requests</h3>
+                    <p style="color: var(--muted-text); font-size: 14px;">Browse community matches or suggestions to send your first service inquiry.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+    <script>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function updateRequest(requestId, status) {
+            fetch(`/update-request/${requestId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.showModernToast) showModernToast(`Request marked as ${status}`, 'emerald');
+                    setTimeout(() => window.location.reload(), 600);
+                } else {
+                    if (window.showModernToast) showModernToast(data.error || 'Failed to update request', 'rose');
+                    else alert('Update failed');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function startChat(userId, userName) {
+            window.location.href = `/communication?user_id=${userId}`;
+        }
+    </script>
+</body>
+</html>

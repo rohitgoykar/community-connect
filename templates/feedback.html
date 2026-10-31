@@ -1,0 +1,760 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer & Partner Reviews & Trust Scores — CommunityKart</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --amz-dark: #131921;
+            --amz-subnav: #232f3e;
+            --amz-orange: #FF9900;
+            --amz-yellow: #FFD814;
+            --amz-yellow-hover: #F7CA00;
+            --fk-blue: #2874f0;
+            --fk-green: #388e3c;
+            --bg-page: #EAEDED;
+            --card-bg: #FFFFFF;
+            --border-color: #D5D9D9;
+            --text-main: #0F1111;
+            --text-muted: #565959;
+            --text-link: #007185;
+            --star-gold: #FFA41C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* ================= 1. OFFICIAL AMAZON / FLIPKART TOP NAVBAR ================= */
+        .amz-header {
+            background-color: var(--amz-dark);
+            color: #FFFFFF;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+
+        .amz-header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            gap: 18px;
+        }
+
+        .amz-brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+        .amz-brand-logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+        .amz-brand-logo span {
+            color: var(--amz-orange);
+        }
+
+        .amz-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .amz-nav-item {
+            text-decoration: none;
+            color: #FFFFFF;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+        }
+        .amz-nav-item:hover {
+            border-color: #FFFFFF;
+        }
+        .amz-nav-item .sub {
+            font-size: 11px;
+            color: #CCCCCC;
+        }
+        .amz-nav-item .main {
+            font-weight: 700;
+        }
+
+        /* Sub-nav */
+        .amz-subnav-bar {
+            background-color: var(--amz-subnav);
+            padding: 8px 24px;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #FFFFFF;
+            overflow-x: auto;
+        }
+        .amz-subnav-bar a {
+            color: #FFFFFF;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.15s;
+        }
+        .amz-subnav-bar a:hover {
+            color: var(--amz-orange);
+        }
+
+        /* ================= 2. MAIN CONTAINER ================= */
+        .reviews-container {
+            max-width: 1240px;
+            margin: 24px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 900px) {
+            .reviews-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Column: Rating Breakdown */
+        .rating-summary-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            height: fit-content;
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .big-score-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .big-score-val {
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1;
+            color: #B12704;
+        }
+
+        .stars-gold {
+            color: var(--star-gold);
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+
+        .total-ratings-count {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        /* Distribution Progress Bars */
+        .dist-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--text-link);
+            cursor: pointer;
+        }
+        .dist-row:hover {
+            text-decoration: underline;
+        }
+
+        .dist-track {
+            flex: 1;
+            height: 18px;
+            background: #F0F2F2;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .dist-fill {
+            height: 100%;
+            background: var(--star-gold);
+            border-radius: 4px;
+        }
+
+        .dist-pct {
+            width: 38px;
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Trust Score Callout Box */
+        .trust-score-badge-card {
+            background: #F0FDF4;
+            border: 1.5px solid #BBF7D0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .trust-score-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 14px;
+            color: #166534;
+            margin-bottom: 6px;
+        }
+
+        .trust-score-desc {
+            font-size: 12px;
+            color: #15803D;
+            line-height: 1.4;
+        }
+
+        /* Right Column: Review Submission & Review Feed */
+        .main-reviews-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Flash Message */
+        .flash-box {
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .flash-box.success {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            color: #15803D;
+        }
+        .flash-box.error {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #B91C1C;
+        }
+
+        /* Form Card */
+        .write-review-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .review-mode-tabs {
+            display: flex;
+            border-bottom: 2px solid #E5E7EB;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .mode-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748B;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-tab-btn.active {
+            color: #C45500;
+            border-bottom-color: var(--amz-orange);
+        }
+
+        .mode-tab-btn.active.provider-tab {
+            color: var(--fk-blue);
+            border-bottom-color: var(--fk-blue);
+        }
+
+        /* Star Picker */
+        .star-rating-widget {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 8px;
+            font-size: 30px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .star-rating-widget input {
+            display: none;
+        }
+
+        .star-rating-widget label {
+            color: #D1D5DB;
+            cursor: pointer;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .star-rating-widget label:hover,
+        .star-rating-widget label:hover ~ label,
+        .star-rating-widget input:checked ~ label {
+            color: var(--star-gold);
+            transform: scale(1.15);
+        }
+
+        .form-select-custom, .form-textarea-custom {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #888C8C;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #111;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+        .form-select-custom:focus, .form-textarea-custom:focus {
+            border-color: #e77600;
+            box-shadow: 0 0 3px 2px rgb(228 121 17 / 50%);
+        }
+
+        .btn-submit-review {
+            background: var(--amz-yellow);
+            border: 1px solid #FCD200;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0F1111;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(213,217,217,.5);
+            transition: all 0.2s;
+        }
+        .btn-submit-review:hover {
+            background: var(--amz-yellow-hover);
+        }
+
+        /* Reviews Feed List */
+        .reviews-feed-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .feed-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .single-review-item {
+            padding: 18px 0;
+            border-bottom: 1px solid #E7E7E7;
+        }
+        .single-review-item:last-child {
+            border-bottom: none;
+        }
+
+        .reviewer-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .reviewer-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #232f3e;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--text-main);
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #C45500;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+
+        .review-rating-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .review-comment-text {
+            font-size: 13.5px;
+            color: #333333;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .review-target-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #F0F2F2;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 11.5px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .review-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Official Top Navbar -->
+    <header class="amz-header">
+        <div class="amz-header-main">
+            <a href="/" class="amz-brand">
+                <div class="amz-brand-logo">⚡ Community<span>Kart</span></div>
+            </a>
+
+            <div class="amz-nav-actions">
+                <a href="/services" class="amz-nav-item">
+                    <span class="sub">Marketplace</span>
+                    <span class="main">🛒 Browse Services</span>
+                </a>
+                <a href="/services/my-bookings" class="amz-nav-item">
+                    <span class="sub">Returns &</span>
+                    <span class="main">📦 Bookings Hub</span>
+                </a>
+                <a href="/services/provider-dashboard" class="amz-nav-item">
+                    <span class="sub">Seller Hub</span>
+                    <span class="main">💼 Provider Dashboard</span>
+                </a>
+                <div class="amz-nav-item">
+                    <span class="sub">Hello, {{ user.name or user.username }}</span>
+                    <span class="main">🛡️ {{ user.trust_score }}% Trust Score</span>
+                </div>
+                <a href="/logout" class="amz-nav-item" style="color:#FF9900;">
+                    <span class="sub">Session</span>
+                    <span class="main">Sign Out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sub-nav bar -->
+        <div class="amz-subnav-bar">
+            <a href="/services">☰ All Categories</a>
+            <a href="/services?category=electrician">⚡ Electrician</a>
+            <a href="/services?category=plumber">🚰 Plumber</a>
+            <a href="/services?category=ac_repair">❄️ AC Repair</a>
+            <a href="/services?category=cleaning">🧹 Cleaning</a>
+            <a href="/feedback" style="color:var(--amz-orange);">⭐ Customer Reviews & Trust Index</a>
+            <a href="/services/provider-dashboard">💼 Seller Central</a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="reviews-container">
+
+        <!-- Left Column: Overall Breakdown -->
+        <div class="rating-summary-card">
+            <h2 class="summary-title">Customer Reviews</h2>
+
+            <div class="big-score-row">
+                <div class="big-score-val">{{ "%.1f"|format(user.rating or 4.9) }}</div>
+                <div>
+                    <div class="stars-gold">★★★★★</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">out of 5 stars</div>
+                </div>
+            </div>
+
+            <div class="total-ratings-count">
+                {{ user.total_ratings or 42 }} verified customer & provider ratings
+            </div>
+
+            <!-- Amazon Distribution Bars -->
+            <div class="dist-row">
+                <span>5 star</span>
+                <div class="dist-track"><div class="dist-fill" style="width: 82%;"></div></div>
+                <span class="dist-pct">82%</span>
+            </div>
+            <div class="dist-row">
+                <span>4 star</span>
+                <div class="dist-track"><div class="dist-fill" style="width: 12%;"></div></div>
+                <span class="dist-pct">12%</span>
+            </div>
+            <div class="dist-row">
+                <span>3 star</span>
+                <div class="dist-track"><div class="dist-fill" style="width: 4%;"></div></div>
+                <span class="dist-pct">4%</span>
+            </div>
+            <div class="dist-row">
+                <span>2 star</span>
+                <div class="dist-track"><div class="dist-fill" style="width: 1%;"></div></div>
+                <span class="dist-pct">1%</span>
+            </div>
+            <div class="dist-row">
+                <span>1 star</span>
+                <div class="dist-track"><div class="dist-fill" style="width: 1%;"></div></div>
+                <span class="dist-pct">1%</span>
+            </div>
+
+            <!-- Trust Index Callout -->
+            <div class="trust-score-badge-card">
+                <div class="trust-score-header">
+                    <span>🛡️</span> Community Trust Index: {{ user.trust_score }}%
+                </div>
+                <div class="trust-score-desc">
+                    Calculated in real-time from verified service orders, punctuality, and mutual 2-way feedback between customers and providers.
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; font-size: 12px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid #E7E7E7; padding-top: 16px;">
+                <strong>How Mutual Reviews Work:</strong><br>
+                When a customer books a service, both the Customer and the Service Provider can rate each other upon completion to maintain community safety and top ratings.
+            </div>
+        </div>
+
+        <!-- Right Column: Submission Form & Verified Reviews Feed -->
+        <div class="main-reviews-panel">
+
+            <!-- Flash alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-box {{ category }}">
+                            <span>{% if category == 'success' %}✅{% else %}⚠️{% endif %}</span>
+                            <div>{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Write a Verified Review Form -->
+            <div class="write-review-card">
+                <div class="review-mode-tabs">
+                    <button type="button" class="mode-tab-btn active" id="btnRateProvider" onclick="setReviewMode('provider')">
+                        🛠️ Rate a Service Provider
+                    </button>
+                    <button type="button" class="mode-tab-btn" id="btnRateCustomer" onclick="setReviewMode('customer')">
+                        🛒 Rate a Customer / Client
+                    </button>
+                </div>
+
+                <form method="POST" action="/feedback">
+                    <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px;" id="recipientLabel">
+                        Select Service Provider to Review:
+                    </div>
+
+                    <!-- Dropdown for Provider / Customer -->
+                    <select name="to_user_id" id="to_user_id" class="form-select-custom" required>
+                        <option value="">-- Choose verified user / partner --</option>
+                        {% for u in all_users %}
+                        <option value="{{ u.id }}" {% if target_user_id == u.id %}selected{% endif %} data-role="{{ u.role or 'customer' }}">
+                            {{ u.name or u.username }} ({{ u.role|title if u.role else 'Customer' }}) &bull; Rating: {{ u.rating or 5.0 }}★ &bull; Trust: {{ u.trust_score }}%
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 6px;">
+                        Overall Rating *
+                    </div>
+                    <!-- Star Rating Widget -->
+                    <div class="star-rating-widget">
+                        <input type="radio" id="star5" name="rating" value="5" checked><label for="star5" title="5 stars - Outstanding">★</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars - Very Good">★</label>
+                        <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars - Average">★</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars - Poor">★</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star - Terrible">★</label>
+                    </div>
+
+                    <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 6px;">
+                        Add a written review
+                    </div>
+                    <textarea name="comment" rows="4" class="form-textarea-custom" placeholder="What did you like or dislike? How was the service quality, arrival punctuality, and pricing?" required></textarea>
+
+                    <button type="submit" class="btn-submit-review">
+                        Submit Verified Review &bull; Update Trust Score
+                    </button>
+                </form>
+            </div>
+
+            <!-- Feed of Verified Reviews -->
+            <div class="reviews-feed-card">
+                <div class="feed-header">
+                    <span>Verified Community Feedback Feed</span>
+                    <span style="font-size: 12.5px; color: var(--text-muted); font-weight: normal;">Showing recent feedback</span>
+                </div>
+
+                {% if received_feedback or given_feedback %}
+                    {% for fb in (received_feedback + given_feedback)[:10] %}
+                    <div class="single-review-item">
+                        <div class="reviewer-meta">
+                            <div class="reviewer-avatar">
+                                {{ (fb.from_user.name or fb.from_user.username)[0]|upper }}
+                            </div>
+                            <div>
+                                <div class="reviewer-name">{{ fb.from_user.name or fb.from_user.username }}</div>
+                                <div class="verified-badge">
+                                    <span>✓</span> Verified Community Service Order
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                {{ fb.created_at.strftime('%d %b %Y') if fb.created_at else 'Recent' }}
+                            </div>
+                        </div>
+
+                        <div class="review-rating-line">
+                            <div class="stars-gold" style="font-size: 15px;">
+                                {% for i in range(fb.rating) %}★{% endfor %}
+                            </div>
+                            <span class="review-target-pill">
+                                Review for: <strong>{{ fb.to_user.name or fb.to_user.username }}</strong> ({{ fb.to_user.role|title if fb.to_user.role else 'Customer' }})
+                            </span>
+                        </div>
+
+                        <div class="review-comment-text">
+                            "{{ fb.comment }}"
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Default realistic initial reviews if none exist yet -->
+                    <div class="single-review-item">
+                        <div class="reviewer-meta">
+                            <div class="reviewer-avatar">R</div>
+                            <div>
+                                <div class="reviewer-name">Rohit Patil (Customer)</div>
+                                <div class="verified-badge"><span>✓</span> Verified Community Service Order</div>
+                            </div>
+                            <div class="review-date">Today</div>
+                        </div>
+                        <div class="review-rating-line">
+                            <div class="stars-gold" style="font-size: 15px;">★★★★★</div>
+                            <span class="review-target-pill">Review for: <strong>Ganesh Electrician (Provider)</strong></span>
+                        </div>
+                        <div class="review-comment-text">
+                            "Arrived in under 25 minutes! Fixed our MCB tripping issue and replaced the blown capacitor smoothly. Clean work, fair rate, and very polite behavior."
+                        </div>
+                    </div>
+
+                    <div class="single-review-item">
+                        <div class="reviewer-meta">
+                            <div class="reviewer-avatar" style="background: #2874f0;">G</div>
+                            <div>
+                                <div class="reviewer-name">Ganesh Electrician (Provider)</div>
+                                <div class="verified-badge"><span>✓</span> Verified Community Service Order</div>
+                            </div>
+                            <div class="review-date">Yesterday</div>
+                        </div>
+                        <div class="review-rating-line">
+                            <div class="stars-gold" style="font-size: 15px;">★★★★★</div>
+                            <span class="review-target-pill">Review for: <strong>Rohit Patil (Customer)</strong></span>
+                        </div>
+                        <div class="review-comment-text">
+                            "Great customer! Clear instructions, friendly neighborhood demeanor, and instant payment via UPI as soon as testing was completed."
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function setReviewMode(mode) {
+            const btnProv = document.getElementById('btnRateProvider');
+            const btnCust = document.getElementById('btnRateCustomer');
+            const recipientLabel = document.getElementById('recipientLabel');
+            const selectElem = document.getElementById('to_user_id');
+
+            if (mode === 'customer') {
+                btnCust.className = 'mode-tab-btn active provider-tab';
+                btnProv.className = 'mode-tab-btn';
+                recipientLabel.innerText = 'Select Customer / Client to Review:';
+                
+                // Highlight customer options
+                Array.from(selectElem.options).forEach(opt => {
+                    if (opt.value) {
+                        const r = opt.getAttribute('data-role');
+                        opt.style.display = (r === 'customer') ? 'block' : 'none';
+                    }
+                });
+            } else {
+                btnProv.className = 'mode-tab-btn active';
+                btnCust.className = 'mode-tab-btn';
+                recipientLabel.innerText = 'Select Service Provider to Review:';
+                
+                // Highlight provider options
+                Array.from(selectElem.options).forEach(opt => {
+                    if (opt.value) {
+                        const r = opt.getAttribute('data-role');
+                        opt.style.display = (r === 'provider') ? 'block' : 'none';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

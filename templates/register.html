@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Smart Community</title>
+    
+    <!-- Premium Google Fonts Pairing (Classic Serif + Modern Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --input-bg: #F5F6F0;
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent !important;
+            color: var(--obsidian-black);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Split-Screen Container Layout */
+        .split-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Left Side: Visual Panel (Light Mode) */
+        .visual-panel {
+            flex: 1.1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-right: 1px solid rgba(10, 12, 16, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 60px;
+            color: var(--obsidian-black);
+            overflow: hidden;
+        }
+
+        .visual-panel::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(197, 160, 89, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .brand-logo {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--obsidian-black);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .brand-logo span {
+            color: var(--accent-gold-light);
+        }
+
+        .panel-quote {
+            max-width: 500px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .panel-quote h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            line-height: 1.25;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--obsidian-black);
+        }
+
+        .panel-quote p {
+            font-size: 15.5px;
+            color: #4A5568;
+            font-weight: 400;
+            line-height: 1.7;
+        }
+
+        /* Right Side: Clean Modern Form Panel */
+        .form-panel {
+            flex: 0.9;
+            background: rgba(248, 249, 245, 0.88) !important;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 10%;
+            position: relative;
+            z-index: 1;
+            animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .form-header {
+            margin-bottom: 35px;
+        }
+
+        .form-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--obsidian-black);
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            font-size: 14.5px;
+            color: var(--muted-text);
+        }
+
+        .form-header a {
+            color: var(--accent-gold-light);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .form-header a:hover {
+            color: var(--obsidian-black);
+            text-decoration: underline;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-pw-eye {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #718096;
+            font-size: 16px;
+            padding: 4px;
+            transition: color 0.3s;
+        }
+
+        .toggle-pw-eye:hover {
+            color: var(--obsidian-black);
+        }
+
+        /* Password strength meter */
+        .strength-meter {
+            height: 4px;
+            width: 100%;
+            background: #E2E8F0;
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 991px) {
+            .visual-panel { display: none; }
+            .form-panel { padding: 60px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-container">
+        
+        <!-- Left Visual Block -->
+        <div class="visual-panel">
+            <a href="/" class="brand-logo">Smart<span>Community</span></a>
+            
+            <div class="panel-quote">
+                <h2>Join a safer, connected neighborhood.</h2>
+                <p>Register in seconds to discover trusted skill matches, trade local services, and keep up with vital community happenings in real time.</p>
+            </div>
+            
+            <div style="font-size: 12px; opacity: 0.7; letter-spacing: 0.5px;">
+                &copy; 2026 Smart Community Network. All rights reserved.
+            </div>
+        </div>
+        
+        <!-- Right Form Block -->
+        <div class="form-panel">
+            <div class="form-header">
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(197,160,89,0.12); border: 1px solid rgba(197,160,89,0.3); padding: 4px 12px; border-radius: 20px; margin-bottom: 12px;">
+                    <span id="portalBadge" style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent-gold);">📋 Customer Portal &bull; Service Required</span>
+                </div>
+                <h1 id="portalTitle">Create Account</h1>
+                <p id="portalSub">Already registered? <a href="/login">Access portal here</a></p>
+            </div>
+
+            <!-- Luxury Dual Portal Tab Switcher -->
+            <div style="background: rgba(10,12,16,0.04); border: 1.5px solid rgba(10,12,16,0.08); border-radius: 14px; padding: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 28px;">
+                <button type="button" id="tabCustomer" onclick="switchPortal('customer')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 10px; background: #FFFFFF; border-radius: 10px; border: 2px solid var(--accent-gold-light); cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 14px rgba(197,160,89,0.2); font-family: inherit;">
+                    <span style="font-size: 22px; margin-bottom: 2px;">📋</span>
+                    <strong style="font-size: 13px; color: var(--obsidian-black);">Service Required</strong>
+                    <span style="font-size: 10px; color: #64748B; margin-top: 2px;">Hire Verified Pros &bull; Customer</span>
+                </button>
+                <button type="button" id="tabProvider" onclick="switchPortal('provider')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 10px; background: transparent; border-radius: 10px; border: 2px solid transparent; cursor: pointer; transition: all 0.25s; font-family: inherit;">
+                    <span style="font-size: 22px; margin-bottom: 2px;">🛠️</span>
+                    <strong style="font-size: 13px; color: #64748B;">Service Provider</strong>
+                    <span style="font-size: 10px; color: #94A3B8; margin-top: 2px;">Register Trade &bull; Seller Partner</span>
+                </button>
+            </div>
+
+            <form method="POST" action="/register" id="regForm">
+                <input type="hidden" name="role" id="roleInput" value="{{ role or 'customer' }}">
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern" for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" class="form-control-modern" placeholder="e.g. Ramesh Patil" required autofocus>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" for="username">Username *</label>
+                        <input type="text" id="username" name="username" class="form-control-modern" placeholder="e.g. ramesh_pro" required>
+                    </div>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" for="contact">Phone *</label>
+                        <input type="tel" id="contact" name="contact" class="form-control-modern" placeholder="10-digit mobile" required>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern" for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-control-modern" placeholder="e.g. ramesh@example.com" required>
+                </div>
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern" for="location">Locality / City *</label>
+                    <input type="text" id="location" name="location" class="form-control-modern" placeholder="e.g. Sangamner, Ward 3" value="Sangamner" required>
+                </div>
+
+                <!-- Provider-Only Section (shown dynamically) -->
+                <div id="providerFields" style="display: none; background: rgba(197,160,89,0.06); border: 1.5px solid rgba(197,160,89,0.25); border-radius: 12px; padding: 18px; margin-bottom: 18px; transition: all 0.3s;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-gold); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                        <span>💼</span> Provider Trade Details
+                    </div>
+                    <div class="form-group-modern" style="margin-bottom: 12px;">
+                        <label class="form-label-modern" for="trade_category">Trade Category *</label>
+                        <select id="trade_category" name="trade_category" class="form-control-modern" style="background: #fff;">
+                            {% for cat in categories %}
+                            <option value="{{ cat.key }}">{{ cat.icon }} {{ cat.label }} — {{ cat.desc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <label class="form-label-modern" for="rate_per_hour">Hourly Rate (₹)</label>
+                            <input type="number" id="rate_per_hour" name="rate_per_hour" class="form-control-modern" placeholder="e.g. 299" value="299">
+                        </div>
+                        <div>
+                            <label class="form-label-modern" for="rate_per_visit">Visit Fee (₹)</label>
+                            <input type="number" id="rate_per_visit" name="rate_per_visit" class="form-control-modern" placeholder="e.g. 99" value="99">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <label class="form-label-modern" for="experience_years">Experience (Years)</label>
+                            <input type="number" id="experience_years" name="experience_years" class="form-control-modern" placeholder="e.g. 5" value="5">
+                        </div>
+                        <div style="display: flex; align-items: center; padding-top: 24px;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--obsidian-black);">
+                                <input type="checkbox" name="emergency_available" value="1" checked style="width: 16px; height: 16px; accent-color: var(--accent-gold);">
+                                ⚡ 30-Min Fast Dispatch
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group-modern" style="margin-bottom: 0;">
+                        <label class="form-label-modern" for="bio">Professional Bio & Skills</label>
+                        <textarea id="bio" name="bio" class="form-control-modern" rows="3" placeholder="Describe your expertise, certifications, and types of work you handle..." style="height: auto; resize: vertical;"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern" for="password">Create Password *</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" class="form-control-modern" placeholder="••••••••••••" required oninput="checkStrength(this.value)">
+                        <button type="button" class="toggle-pw-eye toggle-password-btn" data-target="#password">👁️</button>
+                    </div>
+                    <div class="strength-meter">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <small id="strengthText" style="font-size: 11px; color: var(--muted-text); margin-top: 4px; display: block;"></small>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-luxury-primary" style="width: 100%; margin-top: 10px; padding: 16px;">
+                    <span id="submitBtnText">Create Customer Account &rarr;</span>
+                </button>
+            </form>
+
+            <p style="margin-top: 24px; font-size: 12px; color: var(--muted-text); text-align: center; line-height: 1.6;">
+                By signing up, you agree to our <a href="#" style="color: var(--obsidian-black); text-decoration: none; font-weight: 600;">Community Standards</a> and <a href="#" style="color: var(--obsidian-black); text-decoration: none; font-weight: 600;">Privacy Policy</a>.
+            </p>
+        </div>
+        
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+    <script>
+        function checkStrength(pwd) {
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            let score = 0;
+            if (pwd.length >= 6) score += 25;
+            if (pwd.length >= 10) score += 25;
+            if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) score += 25;
+            if (/[^A-Za-z0-9]/.test(pwd)) score += 25;
+
+            fill.style.width = score + '%';
+            if (score <= 25) {
+                fill.style.backgroundColor = '#EF4444';
+                text.innerText = 'Weak password';
+            } else if (score <= 50) {
+                fill.style.backgroundColor = '#F59E0B';
+                text.innerText = 'Moderate strength';
+            } else if (score <= 75) {
+                fill.style.backgroundColor = '#3B82F6';
+                text.innerText = 'Strong password';
+            } else {
+                fill.style.backgroundColor = '#10B981';
+                text.innerText = 'Very strong password';
+            }
+        }
+
+        function switchPortal(portal) {
+            const roleInput = document.getElementById('roleInput');
+            const tabCust = document.getElementById('tabCustomer');
+            const tabProv = document.getElementById('tabProvider');
+            const portalBadge = document.getElementById('portalBadge');
+            const portalTitle = document.getElementById('portalTitle');
+            const providerFields = document.getElementById('providerFields');
+            const submitBtnText = document.getElementById('submitBtnText');
+
+            roleInput.value = portal;
+
+            if (portal === 'provider') {
+                tabCust.style.background = 'transparent';
+                tabCust.style.borderColor = 'transparent';
+                tabCust.style.boxShadow = 'none';
+                tabCust.querySelector('strong').style.color = '#64748B';
+
+                tabProv.style.background = '#FFFFFF';
+                tabProv.style.borderColor = 'var(--accent-gold-light)';
+                tabProv.style.boxShadow = '0 4px 14px rgba(197,160,89,0.2)';
+                tabProv.querySelector('strong').style.color = 'var(--obsidian-black)';
+
+                portalBadge.textContent = '🛠️ Provider Portal • Seller Partner';
+                portalTitle.textContent = 'Register as Service Provider';
+                providerFields.style.display = 'block';
+                submitBtnText.textContent = 'Register as Service Provider →';
+                history.replaceState(null, null, '?role=provider');
+            } else {
+                tabCust.style.background = '#FFFFFF';
+                tabCust.style.borderColor = 'var(--accent-gold-light)';
+                tabCust.style.boxShadow = '0 4px 14px rgba(197,160,89,0.2)';
+                tabCust.querySelector('strong').style.color = 'var(--obsidian-black)';
+
+                tabProv.style.background = 'transparent';
+                tabProv.style.borderColor = 'transparent';
+                tabProv.style.boxShadow = 'none';
+                tabProv.querySelector('strong').style.color = '#64748B';
+
+                portalBadge.textContent = '📋 Customer Portal • Service Required';
+                portalTitle.textContent = 'Create Account';
+                providerFields.style.display = 'none';
+                submitBtnText.textContent = 'Create Customer Account →';
+                history.replaceState(null, null, '?role=customer');
+            }
+        }
+
+        // Initialize from URL role param
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const role = params.get('role') || '{{ role or "customer" }}';
+            switchPortal(role);
+        });
+    </script>
+</body>
+</html>

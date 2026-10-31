@@ -1,0 +1,1379 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommunityKart — Official Services Marketplace (Amazon & Flipkart Style)</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter for true official look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --amz-dark: #131921;
+            --amz-subnav: #232f3e;
+            --amz-accent: #febd69;
+            --amz-accent-hover: #f3a847;
+            --amz-orange: #FF9900;
+            --fk-blue: #2874f0;
+            --fk-blue-dark: #1f5ac5;
+            --fk-green: #388e3c;
+            --fk-yellow: #ffe500;
+            --canvas-bg: #F1F3F6;
+            --card-bg: #FFFFFF;
+            --border-color: #E0E0E0;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+            background-color: var(--canvas-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* ================= 1. OFFICIAL AMAZON / FLIPKART TOP NAVBAR ================= */
+        .amz-header {
+            background-color: var(--amz-dark);
+            color: #FFFFFF;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+
+        .amz-header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            gap: 18px;
+        }
+
+        /* Brand Logo */
+        .amz-brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+        .amz-brand-logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+        .amz-brand-logo span {
+            color: var(--amz-orange);
+        }
+        .amz-brand-plus {
+            font-size: 10.5px;
+            font-style: italic;
+            color: #E0E7FF;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        .amz-brand-plus span {
+            color: var(--fk-yellow);
+            font-weight: 800;
+        }
+
+        /* Location Selector Pill */
+        .amz-loc-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 0.2s;
+        }
+        .amz-loc-btn:hover {
+            border-color: #fff;
+        }
+        .amz-loc-sub {
+            font-size: 10px;
+            color: #CCCCCC;
+            line-height: 1;
+        }
+        .amz-loc-main {
+            font-size: 12.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #FFFFFF;
+        }
+
+        /* Search Bar */
+        .amz-search-container {
+            display: flex;
+            flex: 1;
+            max-width: 720px;
+            height: 42px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
+        .amz-search-cat {
+            background: #F3F4F6;
+            border: none;
+            border-right: 1px solid #D1D5DB;
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            outline: none;
+            cursor: pointer;
+        }
+        .amz-search-input {
+            flex: 1;
+            border: none;
+            padding: 0 16px;
+            font-size: 13.5px;
+            outline: none;
+            color: #111827;
+        }
+        .amz-search-btn {
+            background: var(--amz-accent);
+            border: none;
+            width: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .amz-search-btn:hover {
+            background: var(--amz-accent-hover);
+        }
+
+        /* Portal Switcher Buttons (Core User Feature) */
+        .amz-portal-switcher {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .amz-switch-tab {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .tab-customer-active {
+            background: #FFFFFF;
+            color: var(--amz-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .tab-provider-pill {
+            color: #FCD34D;
+        }
+        .tab-provider-pill:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Nav Right Items */
+        .amz-nav-item {
+            color: #FFFFFF;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .amz-nav-item:hover {
+            border-color: #FFFFFF;
+        }
+        .amz-nav-sub {
+            font-size: 10px;
+            color: #CCCCCC;
+            line-height: 1;
+        }
+        .amz-nav-main {
+            font-size: 12.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .amz-cart-badge {
+            background: var(--amz-orange);
+            color: #111;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
+        /* Secondary Sub-Navigation Bar */
+        .amz-subnav {
+            background-color: var(--amz-subnav);
+            padding: 7px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12.5px;
+            font-weight: 600;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .amz-sublink {
+            color: #FFFFFF;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+        }
+        .amz-sublink:hover {
+            border-color: #FFFFFF;
+        }
+        .amz-sublink.highlight {
+            color: var(--amz-accent);
+            font-weight: 700;
+        }
+
+        /* ================= 2. FLIPKART CIRCULAR CATEGORY STRIP ================= */
+        .fk-strip-wrapper {
+            background: #FFFFFF;
+            padding: 16px 24px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .fk-strip {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1360px;
+            margin: 0 auto;
+            overflow-x: auto;
+            gap: 20px;
+            padding-bottom: 4px;
+        }
+        .fk-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #111827;
+            font-size: 12px;
+            font-weight: 700;
+            gap: 8px;
+            min-width: 76px;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .fk-item:hover {
+            transform: translateY(-3px);
+            color: var(--fk-blue);
+        }
+        .fk-circle {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+        .fk-item.active .fk-circle {
+            background: var(--amz-dark);
+            border-color: var(--amz-orange);
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.35);
+        }
+        .fk-item.active span {
+            color: var(--amz-orange);
+            font-weight: 800;
+        }
+
+        /* ================= 3. OFFICIAL HERO PROMOTIONAL BANNER ================= */
+        .main-container {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 0 20px 50px 20px;
+        }
+
+        .promo-banner {
+            background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 60%, #111827 100%);
+            border-radius: 14px;
+            padding: 36px 44px;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(30, 58, 138, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(254, 189, 105, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .promo-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--amz-orange);
+            color: #111827;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .promo-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        .promo-title span {
+            color: var(--amz-accent);
+        }
+        .promo-desc {
+            font-size: 14px;
+            color: #E2E8F0;
+            max-width: 580px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .promo-btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .promo-btn-primary {
+            background: var(--amz-accent);
+            color: #111827;
+            font-weight: 800;
+            font-size: 13.5px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(254, 189, 105, 0.35);
+        }
+        .promo-btn-primary:hover {
+            background: var(--amz-accent-hover);
+            transform: translateY(-2px);
+        }
+        .promo-btn-secondary {
+            background: rgba(255, 255, 255, 0.12);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 13.5px;
+            padding: 12px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s;
+        }
+        .promo-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        /* ================= 4. DUAL LAYOUT: FILTERS SIDEBAR + PRODUCT GRID ================= */
+        .marketplace-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 22px;
+            align-items: flex-start;
+        }
+
+        /* Faceted Filters Sidebar */
+        .filter-sidebar {
+            background: #FFFFFF;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            position: sticky;
+            top: 110px;
+        }
+        .filter-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .filter-group {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #F3F4F6;
+            padding-bottom: 16px;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .filter-item:hover {
+            color: var(--fk-blue);
+        }
+        .filter-checkbox {
+            margin-right: 8px;
+            accent-color: var(--fk-blue);
+        }
+        .filter-count {
+            font-size: 11px;
+            color: #9CA3AF;
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* ================= 5. AMAZON PRODUCT / SERVICE CARDS ================= */
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FFFFFF;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 18px;
+        }
+        .grid-header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .services-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .prod-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .prod-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            border-color: #CBD5E1;
+        }
+
+        /* Badges */
+        .badge-amz-choice {
+            position: absolute;
+            top: 12px; left: 12px;
+            background: #111827;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-amz-choice span {
+            color: var(--amz-orange);
+        }
+        .badge-discount {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: #DCFCE7;
+            color: #166534;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Service Thumbnail */
+        .prod-thumb {
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            margin: 18px 0 12px 0;
+            background: radial-gradient(circle, #F8FAFC 0%, transparent 75%);
+        }
+
+        .prod-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.35;
+            margin-bottom: 4px;
+            min-height: 40px;
+        }
+        .prod-pro-name {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Flipkart Green Rating Pill */
+        .rating-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .fk-rating-pill {
+            background: var(--fk-green);
+            color: #FFFFFF;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .rating-count {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        .trust-pill {
+            background: #EEF2FF;
+            color: #4F46E5;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid #C7D2FE;
+        }
+
+        /* Pricing row */
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .price-current {
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
+        }
+        .price-orig {
+            font-size: 13px;
+            color: #9CA3AF;
+            text-decoration: line-through;
+        }
+        .price-off {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--fk-green);
+        }
+
+        /* Prime style delivery line */
+        .dispatch-line {
+            font-size: 11.5px;
+            color: #1E40AF;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .prod-features {
+            font-size: 11.5px;
+            color: #4B5563;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .prod-features div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .prod-features span {
+            color: var(--fk-green);
+            font-weight: 800;
+        }
+
+        /* Buttons */
+        .btn-book-now {
+            width: 100%;
+            background: var(--amz-accent);
+            color: #111827;
+            border: 1px solid #D97706;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn-book-now:hover {
+            background: var(--amz-accent-hover);
+            transform: translateY(-1px);
+        }
+        .btn-secondary-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-chat-link, .btn-rate-link {
+            flex: 1;
+            padding: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn-chat-link {
+            background: #F3F4F6;
+            color: #1F2937;
+            border: 1px solid #D1D5DB;
+        }
+        .btn-chat-link:hover {
+            background: #E5E7EB;
+        }
+        .btn-rate-link {
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FCD34D;
+        }
+        .btn-rate-link:hover {
+            background: #FDE68A;
+        }
+
+        /* ================= 6. OFFICIAL 1-CLICK CHECKOUT MODAL ================= */
+        .modal-backdrop-custom {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        .modal-card {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 1px solid #E5E7EB;
+            animation: modalSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #F3F4F6;
+            padding-bottom: 14px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #9CA3AF;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #111; }
+
+        .price-breakup {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #4B5563;
+        }
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: 800;
+            color: #111827;
+            border-top: 1px dashed #CBD5E1;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .marketplace-layout { grid-template-columns: 1fr; }
+            .filter-sidebar { display: none; }
+            .amz-header-main { flex-wrap: wrap; }
+            .amz-search-container { order: 3; max-width: 100%; min-width: 100%; margin-top: 8px; }
+            .promo-banner { padding: 24px; }
+            .promo-title { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. OFFICIAL TOP NAVIGATION BAR -->
+    <header class="amz-header">
+        <div class="amz-header-main">
+            <!-- Brand -->
+            <a href="{{ url_for('services_categories') }}" class="amz-brand">
+                <div>
+                    <div class="amz-brand-logo">Community<span>Kart</span></div>
+                    <div class="amz-brand-plus">Explore <span>Plus ✦</span></div>
+                </div>
+            </a>
+
+            <!-- Location Selector -->
+            <div class="amz-loc-btn" onclick="openLocationModal()">
+                <span style="font-size: 18px;">📍</span>
+                <div>
+                    <div class="amz-loc-sub">Deliver to / Service at</div>
+                    <div id="navLocationText" class="amz-loc-main">Sangamner 422605 ▾</div>
+                </div>
+            </div>
+
+            <!-- Amazon Search Bar -->
+            <form action="{{ url_for('services_categories') }}" method="GET" class="amz-search-container">
+                <select name="category" class="amz-search-cat">
+                    <option value="all">All Services</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.key }}" {% if selected_category == cat.key %}selected{% endif %}>{{ cat.icon }} {{ cat.label }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="q" value="{{ search_q }}" placeholder="Search for 'tap leakage', 'wiring repair', 'deep cleaning'..." class="amz-search-input">
+                <button type="submit" class="amz-search-btn">🔍</button>
+            </form>
+
+            <!-- Dual Portal Switcher (Customer vs Provider) -->
+            <div class="amz-portal-switcher">
+                <a href="{{ url_for('services_categories') }}" class="amz-switch-tab tab-customer-active">
+                    <span>📋</span> Service Required
+                </a>
+                <a href="{{ url_for('services_provider_dashboard') if session.get('role') == 'provider' else url_for('register', role='provider') }}" class="amz-switch-tab tab-provider-pill">
+                    <span>💼</span> Become Seller
+                </a>
+            </div>
+
+            <!-- Reputation Score & Feedback -->
+            <a href="{{ url_for('feedback') }}" class="amz-nav-item">
+                <div class="amz-nav-sub">Community</div>
+                <div class="amz-nav-main">⭐ Scores &amp; Trust</div>
+            </a>
+
+            <!-- Orders / Bookings -->
+            <a href="{{ url_for('my_bookings') }}" class="amz-nav-item">
+                <div class="amz-nav-sub">Returns &amp;</div>
+                <div class="amz-nav-main">
+                    Orders
+                    {% if my_bookings_count > 0 %}
+                    <span class="amz-cart-badge">{{ my_bookings_count }}</span>
+                    {% endif %}
+                </div>
+            </a>
+
+            <!-- User Auth Profile -->
+            {% if user %}
+            <div class="amz-nav-item" style="cursor: default;">
+                <div class="amz-nav-sub">Hello, {{ user.name or user.username }}</div>
+                <div class="amz-nav-main">
+                    <span>Account</span>
+                    <a href="{{ url_for('logout') }}" style="color: #F87171; text-decoration: none; font-size: 11px; margin-left: 6px;">[Sign Out]</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="amz-nav-item">
+                <div class="amz-nav-sub">Hello, Sign In</div>
+                <div class="amz-nav-main">Account &amp; Lists ▾</div>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Secondary Sub-Navigation Strip -->
+        <div class="amz-subnav">
+            <a href="{{ url_for('services_categories') }}" class="amz-sublink highlight">
+                <span>☰</span> All Services
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=plumber" class="amz-sublink">🔧 Plumbers</a>
+            <a href="{{ url_for('services_categories') }}?category=electrician" class="amz-sublink">⚡ Electricians</a>
+            <a href="{{ url_for('services_categories') }}?category=cleaner" class="amz-sublink">🧹 Deep Cleaning</a>
+            <a href="{{ url_for('services_categories') }}?category=ac_technician" class="amz-sublink">❄️ AC &amp; Appliances</a>
+            <a href="{{ url_for('services_categories') }}?category=carpenter" class="amz-sublink">🪚 Carpentry</a>
+            <a href="{{ url_for('services_categories') }}?category=painter" class="amz-sublink">🎨 Painting</a>
+            <a href="#featuredDeals" class="amz-sublink" style="color: #FBBF24;">⚡ Deals of the Day</a>
+            <a href="{{ url_for('feedback') }}" class="amz-sublink">⭐ Reputation Hub</a>
+            <a href="{{ url_for('register') }}?role=provider" class="amz-sublink" style="color: #6EE7B7; margin-left: auto;">
+                💼 Seller Central &bull; Partner With Us
+            </a>
+        </div>
+    </header>
+
+    <!-- 2. FLIPKART CIRCULAR CATEGORY STRIP -->
+    <div class="fk-strip-wrapper">
+        <div class="fk-strip">
+            <a href="{{ url_for('services_categories') }}" class="fk-item {% if not selected_category %}active{% endif %}">
+                <div class="fk-circle">⚡</div>
+                <span>All Offers</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=plumber" class="fk-item {% if selected_category == 'plumber' %}active{% endif %}">
+                <div class="fk-circle">🔧</div>
+                <span>Plumbing</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=electrician" class="fk-item {% if selected_category == 'electrician' %}active{% endif %}">
+                <div class="fk-circle">⚡</div>
+                <span>Electrician</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=cleaner" class="fk-item {% if selected_category == 'cleaner' %}active{% endif %}">
+                <div class="fk-circle">🧹</div>
+                <span>Cleaning</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=ac_technician" class="fk-item {% if selected_category == 'ac_technician' %}active{% endif %}">
+                <div class="fk-circle">❄️</div>
+                <span>AC Repair</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=carpenter" class="fk-item {% if selected_category == 'carpenter' %}active{% endif %}">
+                <div class="fk-circle">🪚</div>
+                <span>Carpentry</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=painter" class="fk-item {% if selected_category == 'painter' %}active{% endif %}">
+                <div class="fk-circle">🎨</div>
+                <span>Painting</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=driver" class="fk-item {% if selected_category == 'driver' %}active{% endif %}">
+                <div class="fk-circle">🚗</div>
+                <span>Driver</span>
+            </a>
+            <a href="{{ url_for('services_categories') }}?category=gardener" class="fk-item {% if selected_category == 'gardener' %}active{% endif %}">
+                <div class="fk-circle">🌿</div>
+                <span>Gardener</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 3. MAIN MARKETPLACE CONTAINER -->
+    <div class="main-container">
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                <div style="background: #ECFDF5; border-left: 4px solid #10B981; padding: 14px 20px; border-radius: 6px; font-size: 13.5px; font-weight: 700; color: #065F46; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>✓ {{ msg }}</div>
+                    <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size:16px;">✕</button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Hero Promotional Banner (Flipkart / Amazon Official Promo) -->
+        <div class="promo-banner">
+            <div style="z-index: 2;">
+                <div class="promo-tag">
+                    ⚡ Community Super Service Festival &bull; Up to 40% OFF
+                </div>
+                <h1 class="promo-title">
+                    100% Background-Checked <span>Local Pros</span><br>at Your Doorstep in 30 Mins.
+                </h1>
+                <p class="promo-desc">
+                    Guaranteed honest transparent pricing, certified spare parts, 30-day rework warranty, and verified community reputation scores.
+                </p>
+                <div class="promo-btn-row">
+                    <a href="#featuredDeals" class="promo-btn-primary">
+                        ⚡ Explore Deals of the Day
+                    </a>
+                    <a href="{{ url_for('register') }}?role=provider" class="promo-btn-secondary">
+                        💼 Register as Service Partner &amp; Earn
+                    </a>
+                </div>
+            </div>
+            <div style="font-size: 110px; opacity: 0.85;" class="desktop-only">
+                🛠️
+            </div>
+        </div>
+
+        <!-- 4. TWO-COLUMN MARKETPLACE LAYOUT -->
+        <div class="marketplace-layout">
+
+            <!-- Left Faceted Filters Sidebar -->
+            <aside class="filter-sidebar">
+                <div class="filter-section-title">
+                    <span>Filters</span>
+                    <a href="{{ url_for('services_categories') }}" style="font-size: 11px; color: var(--fk-blue); text-decoration: none; text-transform: none;">Clear All</a>
+                </div>
+
+                <!-- Categories Filter -->
+                <div class="filter-group">
+                    <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #6B7280; margin-bottom: 10px;">Category</div>
+                    {% for cat in categories[:7] %}
+                    <a href="{{ url_for('services_categories') }}?category={{ cat.key }}" class="filter-item">
+                        <span>{{ cat.icon }} {{ cat.label }}</span>
+                        <span class="filter-count">{{ counts.get(cat.key, 0) }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Customer Rating Filter -->
+                <div class="filter-group">
+                    <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #6B7280; margin-bottom: 10px;">Customer Rating</div>
+                    <a href="{{ url_for('services_categories') }}?min_rating=4.5" class="filter-item">
+                        <span>⭐⭐⭐⭐☆ 4.5 &amp; above</span>
+                        <span class="filter-count">Top</span>
+                    </a>
+                    <a href="{{ url_for('services_categories') }}?min_rating=4.0" class="filter-item">
+                        <span>⭐⭐⭐⭐☆ 4.0 &amp; above</span>
+                        <span class="filter-count">Good</span>
+                    </a>
+                </div>
+
+                <!-- Dispatch Speed -->
+                <div class="filter-group">
+                    <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #6B7280; margin-bottom: 10px;">Service Speed</div>
+                    <div class="filter-item">
+                        <label style="cursor: pointer; display: flex; align-items: center;">
+                            <input type="checkbox" checked class="filter-checkbox">
+                            ⚡ Emergency &lt; 30 Mins
+                        </label>
+                    </div>
+                    <div class="filter-item">
+                        <label style="cursor: pointer; display: flex; align-items: center;">
+                            <input type="checkbox" checked class="filter-checkbox">
+                            📅 Scheduled Booking
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Community Trust Assurance -->
+                <div>
+                    <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: #6B7280; margin-bottom: 10px;">Community Assurance</div>
+                    <div style="font-size: 11.5px; color: #4B5563; line-height: 1.5; background: #F8FAFC; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0;">
+                        🛡️ <strong>100% Resident Verified:</strong> Every professional has background checks and direct neighbor feedback ratings.
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Content Area -->
+            <main>
+                <!-- Section 1: Deals of the Day (Amazon Product Cards) -->
+                <div id="featuredDeals" style="margin-bottom: 32px;">
+                    <div class="grid-header">
+                        <div class="grid-header-title">
+                            <span>⚡</span> Deals of the Day &bull; Instant Dispatch Packages
+                        </div>
+                        <span style="font-size: 12.5px; color: #6B7280; font-weight: 600;">Updated 15 mins ago</span>
+                    </div>
+
+                    <div class="services-card-grid">
+                        {% for deal in deals %}
+                        <div class="prod-card">
+                            <span class="badge-amz-choice">
+                                <span>Amazon's</span> Choice
+                            </span>
+                            <span class="badge-discount">{{ deal.discount }}</span>
+
+                            <div class="prod-thumb">{{ deal.icon }}</div>
+
+                            <div>
+                                <h3 class="prod-title">{{ deal.title }}</h3>
+                                <div class="prod-pro-name">{{ deal.tag }}</div>
+
+                                <div class="rating-row">
+                                    <span class="fk-rating-pill">4.9 ★</span>
+                                    <span class="rating-count">(120+ orders)</span>
+                                    <span class="trust-pill">🛡️ 97% Trust</span>
+                                </div>
+
+                                <div class="price-row">
+                                    <span class="price-current">₹{{ deal.price }}</span>
+                                    <span class="price-orig">₹{{ deal.orig_price }}</span>
+                                    <span class="price-off">{{ deal.discount }}</span>
+                                </div>
+
+                                <div class="dispatch-line">
+                                    <span>{{ deal.arrival }}</span>
+                                </div>
+
+                                <div class="prod-features">
+                                    {% for h in deal.highlights %}
+                                    <div><span>✓</span> {{ h }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="button" class="btn-book-now" onclick="openBookingModal('{{ deal.title }}', '{{ deal.category }}', {{ deal.price }}, 0)">
+                                    ⚡ 1-Click Instant Book
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Section 2: Verified Service Providers Directory (Flipkart Assured Pros) -->
+                <div>
+                    <div class="grid-header">
+                        <div class="grid-header-title">
+                            <span>⭐</span> Verified Neighborhood Service Providers
+                        </div>
+                        <a href="{{ url_for('register') }}?role=provider" style="font-size: 12.5px; font-weight: 700; color: var(--fk-blue); text-decoration: none;">
+                            + Become a Service Partner &rarr;
+                        </a>
+                    </div>
+
+                    {% if all_providers %}
+                    <div class="services-card-grid">
+                        {% for sp in all_providers %}
+                        <div class="prod-card">
+                            <span class="badge-amz-choice" style="background: #1E3A8A;">
+                                <span>✓</span> Community Assured
+                            </span>
+                            <span class="badge-discount" style="background:#EFF6FF; color:#1E40AF;">Available</span>
+
+                            <div class="prod-thumb">
+                                {% if sp.trade_category == 'plumber' %}🔧
+                                {% elif sp.trade_category == 'electrician' %}⚡
+                                {% elif sp.trade_category == 'cleaner' %}🧹
+                                {% elif sp.trade_category == 'ac_technician' %}❄️
+                                {% elif sp.trade_category == 'carpenter' %}🪚
+                                {% elif sp.trade_category == 'painter' %}🎨
+                                {% else %}🛠️{% endif %}
+                            </div>
+
+                            <div>
+                                <h3 class="prod-title">{{ sp.user.name or sp.user.username }}</h3>
+                                <div class="prod-pro-name">
+                                    📍 {{ sp.service_area or 'Sangamner' }} &bull; {{ sp.trade_category.title() }}
+                                </div>
+
+                                <div class="rating-row">
+                                    <span class="fk-rating-pill">{{ "%.1f"|format(sp.user.rating or 5.0) }} ★</span>
+                                    <span class="rating-count">({{ sp.user.total_ratings or 1 }} reviews)</span>
+                                    <span class="trust-pill">🛡️ {{ sp.user.trust_score }}% Trust</span>
+                                </div>
+
+                                <div class="price-row">
+                                    <span class="price-current">₹{{ "%.0f"|format(sp.rate_per_visit if sp.rate_per_visit > 0 else 300) }}</span>
+                                    <span style="font-size: 12px; color: #6B7280;">visit fee (₹{{ "%.0f"|format(sp.rate_per_hour or 200) }}/hr)</span>
+                                </div>
+
+                                <p style="font-size: 12px; color: #6B7280; line-height: 1.4; margin-bottom: 12px;">
+                                    {{ sp.bio or 'Experienced professional providing prompt, reliable, and clean trade service in your locality.' }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <button type="button" class="btn-book-now" onclick="openBookingModal('{{ sp.trade_category.title() }} Service by {{ sp.user.name or sp.user.username }}', '{{ sp.trade_category }}', {{ sp.rate_per_visit or 300 }}, {{ sp.user.id }})">
+                                    ⚡ Book Technician Now
+                                </button>
+                                <div class="btn-secondary-row">
+                                    <a href="{{ url_for('chat') }}?user_id={{ sp.user.id }}" class="btn-chat-link">
+                                        💬 Message
+                                    </a>
+                                    <a href="{{ url_for('feedback') }}?user_id={{ sp.user.id }}" class="btn-rate-link">
+                                        ⭐ Rate Pro
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div style="background: #fff; padding: 50px 20px; border-radius: 10px; text-align: center; border: 1px solid var(--border-color); color: #6B7280;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
+                        <h4 style="font-size: 18px; color: #111; margin-bottom: 6px;">No Service Providers Found</h4>
+                        <p style="font-size: 13.5px;">Try clearing search filters to see all available community technicians.</p>
+                        <a href="{{ url_for('services_categories') }}" style="display:inline-block; margin-top:14px; color: var(--fk-blue); font-weight: 700; text-decoration: none;">View All Services &rarr;</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- 5. 1-CLICK INSTANT BOOKING CHECKOUT MODAL (AMAZON CHECKOUT DRAWER) -->
+    <div id="bookingModal" class="modal-backdrop-custom">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-title">
+                    <span style="font-size: 22px;">⚡</span> 1-Click Instant Service Checkout
+                </div>
+                <button type="button" class="modal-close" onclick="closeBookingModal()">✕</button>
+            </div>
+
+            <form action="{{ url_for('book_service') }}" method="POST">
+                <input type="hidden" name="provider_id" id="modalProviderId" value="0">
+                <input type="hidden" name="service_title" id="modalServiceTitle" value="">
+                <input type="hidden" name="category" id="modalCategory" value="">
+                <input type="hidden" name="amount" id="modalAmount" value="299">
+
+                <!-- Price Breakup Box -->
+                <div class="price-breakup">
+                    <div style="font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: 800; margin-bottom: 6px;">Order Summary</div>
+                    <div id="modalDisplayTitle" style="font-size: 14.5px; font-weight: 800; color: #111827; margin-bottom: 8px;"></div>
+                    <div class="price-line">
+                        <span>Standard Service Charge</span>
+                        <span id="modalDisplayPrice">₹299</span>
+                    </div>
+                    <div class="price-line">
+                        <span>30-Day Escrow Protection Fee</span>
+                        <span style="color: var(--fk-green); font-weight: 700;">FREE</span>
+                    </div>
+                    <div class="price-line">
+                        <span>Community Platform Convenience Fee</span>
+                        <span style="color: var(--fk-green); font-weight: 700;">₹0 (Sponsored)</span>
+                    </div>
+                    <div class="price-total">
+                        <span>Total Payable on Arrival</span>
+                        <span id="modalTotalPayable" style="color: var(--fk-green);">₹299</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 4px;">
+                        Select Arrival Time Slot *
+                    </label>
+                    <select name="time_slot" style="width: 100%; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 6px; font-size: 13.5px; background: #fff;">
+                        <option value="Emergency: Within 30 Mins">⚡ Emergency: Within 30 Mins (Fast Dispatch)</option>
+                        <option value="Today: 2:00 PM - 5:00 PM" selected>Today: 2:00 PM - 5:00 PM</option>
+                        <option value="Today: 5:00 PM - 8:00 PM">Today: 5:00 PM - 8:00 PM</option>
+                        <option value="Tomorrow: Morning 9:00 AM - 12:00 PM">Tomorrow: Morning 9:00 AM - 12:00 PM</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 4px;">
+                        Service Flat / Street Address *
+                    </label>
+                    <input type="text" name="address" value="{{ user.location or 'Sangamner Community, Ward 2' if user else 'Sangamner, Ward 2' }}" required style="width: 100%; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 6px; font-size: 13.5px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 4px;">
+                        Contact Mobile *
+                    </label>
+                    <input type="tel" name="phone" value="{{ user.contact or '9822154321' if user else '' }}" required placeholder="10-digit mobile" style="width: 100%; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 6px; font-size: 13.5px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: #4B5563; display: block; margin-bottom: 4px;">
+                        Payment Method
+                    </label>
+                    <select name="payment_mode" style="width: 100%; padding: 10px 14px; border: 1.5px solid #CBD5E1; border-radius: 6px; font-size: 13.5px; background: #fff;">
+                        <option value="Cash After Service Completion" selected>💵 Cash on Service Completion (Pay After Satisfaction)</option>
+                        <option value="UPI / QR Code on Arrival">📱 UPI / QR Code on Technician Arrival</option>
+                        <option value="Community Escrow Wallet">🛡️ Community Escrow Protection</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-book-now" style="padding: 13px; font-size: 14.5px;">
+                    Place Order &amp; Dispatch Technician &rarr;
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. PINCODE LOCATION SELECTION MODAL -->
+    <div id="locationModal" class="modal-backdrop-custom">
+        <div class="modal-card" style="max-width: 420px;">
+            <div class="modal-head">
+                <div class="modal-title">
+                    <span>📍</span> Choose Delivery Locality
+                </div>
+                <button type="button" class="modal-close" onclick="closeLocationModal()">✕</button>
+            </div>
+            <p style="font-size: 13px; color: #6B7280; margin-bottom: 16px;">
+                Select your neighborhood to view technicians reachable in under 30 minutes.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button type="button" onclick="selectLocation('Sangamner Central (422605)')" style="text-align: left; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 700; font-size: 13px;">
+                    📍 Sangamner Central &bull; 422605
+                </button>
+                <button type="button" onclick="selectLocation('Sangamner College Road (422605)')" style="text-align: left; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 700; font-size: 13px;">
+                    📍 College Road &bull; 422605
+                </button>
+                <button type="button" onclick="selectLocation('Kopargaon Sector 3')" style="text-align: left; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 700; font-size: 13px;">
+                    📍 Kopargaon Sector 3
+                </button>
+                <button type="button" onclick="selectLocation('Rahuri Housing Board')" style="text-align: left; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 700; font-size: 13px;">
+                    📍 Rahuri Housing Board
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Footer -->
+    <footer style="background: var(--amz-dark); color: #9CA3AF; padding: 40px 24px; border-top: 4px solid var(--amz-orange); margin-top: 60px;">
+        <div style="max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; margin-bottom: 30px;">
+            <div>
+                <h4 style="color: #fff; font-size: 15px; font-weight: 800; margin-bottom: 12px;">About CommunityKart</h4>
+                <p style="font-size: 12.5px; line-height: 1.6;">
+                    India's premier digital neighborhood marketplace connecting verified trade technicians with community residents.
+                </p>
+            </div>
+            <div>
+                <h4 style="color: #fff; font-size: 15px; font-weight: 800; margin-bottom: 12px;">Top Services</h4>
+                <div style="font-size: 12.5px; display: flex; flex-direction: column; gap: 6px;">
+                    <a href="{{ url_for('services_categories') }}?category=plumber" style="color: #D1D5DB; text-decoration: none;">Emergency Plumbing</a>
+                    <a href="{{ url_for('services_categories') }}?category=electrician" style="color: #D1D5DB; text-decoration: none;">Electrical Repair</a>
+                    <a href="{{ url_for('services_categories') }}?category=cleaner" style="color: #D1D5DB; text-decoration: none;">Deep Home Cleaning</a>
+                    <a href="{{ url_for('services_categories') }}?category=ac_technician" style="color: #D1D5DB; text-decoration: none;">AC Servicing &amp; Gas</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="color: #fff; font-size: 15px; font-weight: 800; margin-bottom: 12px;">Become a Partner</h4>
+                <p style="font-size: 12.5px; line-height: 1.6; margin-bottom: 10px;">
+                    Register your trade skills to receive direct resident bookings with 0% platform commission.
+                </p>
+                <a href="{{ url_for('register') }}?role=provider" style="color: var(--amz-accent); font-weight: 700; font-size: 13px; text-decoration: none;">Join as Service Partner &rarr;</a>
+            </div>
+            <div>
+                <h4 style="color: #fff; font-size: 15px; font-weight: 800; margin-bottom: 12px;">Safety &amp; Trust</h4>
+                <p style="font-size: 12.5px; line-height: 1.6;">
+                    🛡️ 100% Background-Checked Neighbors<br>
+                    ⭐ Verified Resident Feedback Scoring<br>
+                    ✓ 30-Day Rework Guarantee
+                </p>
+            </div>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: #6B7280; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;">
+            &copy; 2026 CommunityKart &bull; Smart Community Network. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        function openBookingModal(title, category, price, providerId) {
+            document.getElementById('modalServiceTitle').value = title;
+            document.getElementById('modalDisplayTitle').innerText = title;
+            document.getElementById('modalCategory').value = category;
+            document.getElementById('modalAmount').value = price;
+            document.getElementById('modalDisplayPrice').innerText = '₹' + price;
+            document.getElementById('modalTotalPayable').innerText = '₹' + price;
+            document.getElementById('modalProviderId').value = providerId || 0;
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        function openLocationModal() {
+            document.getElementById('locationModal').style.display = 'flex';
+        }
+
+        function closeLocationModal() {
+            document.getElementById('locationModal').style.display = 'none';
+        }
+
+        function selectLocation(loc) {
+            document.getElementById('navLocationText').innerText = loc + ' ▾';
+            closeLocationModal();
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const bModal = document.getElementById('bookingModal');
+            const lModal = document.getElementById('locationModal');
+            if (event.target === bModal) bModal.style.display = 'none';
+            if (event.target === lModal) lModal.style.display = 'none';
+        };
+    </script>
+</body>
+</html>

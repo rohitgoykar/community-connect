@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+{% block title %}Service Provider Registration{% endblock %}
+
+{% macro render_service_form() %}
+<style>
+    .reg-container { max-width: 860px; margin: 0 auto; padding-bottom: 60px; }
+
+    /* ── Header ── */
+    .reg-header {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F7FA 100%);
+        border-radius: 14px 14px 0 0;
+        border: 1px solid rgba(255,255,255,0.8);
+        border-bottom: 2px solid #C5A059;
+        padding: 32px 36px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .reg-header::after {
+        content:''; position:absolute;
+        bottom:0; left:0; right:0; height:3px;
+        background:linear-gradient(90deg,#5E5332,#C5A059,#5E5332);
+    }
+    .reg-header h2 { font-family:'Playfair Display',serif; font-size:26px; color:#0A0C10; margin-bottom:6px; }
+    .reg-header p  { color:#606875; font-size:13.5px; margin:0; }
+
+    /* ── Body ── */
+    .reg-body {
+        background: rgba(255,255,255,0.97);
+        border: 1px solid rgba(255,255,255,0.75);
+        border-radius: 0 0 14px 14px;
+        padding: 36px;
+        box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+    }
+
+    /* ── Section Headers ── */
+    .section-block {
+        border: 1.5px solid rgba(197,160,89,0.22);
+        border-radius: 12px;
+        padding: 24px 26px;
+        margin-bottom: 24px;
+        background: #FDFCF9;
+    }
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.6px;
+        color: #5E5332;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(94,83,50,0.12);
+    }
+    .section-label .sec-icon {
+        width: 28px; height: 28px;
+        background: linear-gradient(135deg,#5E5332,#C5A059);
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; color: #fff;
+    }
+
+    /* ── Form Elements ── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label {
+        font-size: 11.5px; font-weight: 700; color: #0A0C10;
+        text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .form-group label span.opt { font-weight: 400; color: #888; text-transform: none; letter-spacing: 0; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px 14px;
+        border: 1.5px solid rgba(10,12,16,0.12);
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-family: 'Inter', sans-serif;
+        background: #F8F9F5;
+        outline: none;
+        transition: border-color .3s, box-shadow .3s;
+        color: #0A0C10;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #C5A059;
+        box-shadow: 0 0 0 3px rgba(197,160,89,0.12);
+        background: #fff;
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+
+    /* ── Photo Upload ── */
+    .photo-upload-wrap {
+        display: flex; align-items: center; gap: 18px;
+    }
+    .photo-preview {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        border: 3px solid #C5A059;
+        object-fit: cover;
+        background: #F8F9F5;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 30px; color: #C5A059;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .photo-preview img { width:100%; height:100%; object-fit:cover; }
+    .photo-upload-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 18px;
+        background: #F0EDE4;
+        border: 1.5px dashed #C5A059;
+        border-radius: 8px;
+        font-size: 13px; font-weight: 600; color: #5E5332;
+        cursor: pointer; transition: all .25s;
+    }
+    .photo-upload-btn:hover { background: rgba(197,160,89,0.12); }
+    .photo-upload-btn input { display: none; }
+
+    /* ── Category Cards ── */
+    .cat-select-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 10px;
+    }
+    .cat-select-option { position: relative; }
+    .cat-select-option input { position: absolute; opacity: 0; }
+    .cat-select-option label {
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 12px 8px;
+        border: 2px solid rgba(10,12,16,0.1);
+        border-radius: 10px;
+        cursor: pointer; text-align: center;
+        transition: all .25s;
+        background: #F8F9F5;
+        font-family: 'Inter', sans-serif;
+    }
+    .cat-select-option label:hover { border-color: #C5A059; background: rgba(197,160,89,0.08); }
+    .cat-select-option input:checked + label {
+        border-color: #5E5332;
+        background: rgba(94,83,50,0.1);
+        box-shadow: 0 0 0 3px rgba(94,83,50,0.15);
+    }
+    .cat-select-option .ci { font-size: 22px; }
+    .cat-select-option .cl { font-size: 11px; font-weight: 700; color: #0A0C10; }
+
+    /* ── Pricing Type Tabs ── */
+    .pricing-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .pricing-tab { position: relative; }
+    .pricing-tab input { position: absolute; opacity: 0; }
+    .pricing-tab label {
+        display: inline-block;
+        padding: 8px 16px;
+        border: 1.5px solid rgba(10,12,16,0.12);
+        border-radius: 20px;
+        font-size: 12.5px; font-weight: 700;
+        color: #606875; cursor: pointer;
+        transition: all .25s;
+        background: #F8F9F5;
+    }
+    .pricing-tab label:hover { border-color: #C5A059; color: #5E5332; }
+    .pricing-tab input:checked + label {
+        background: linear-gradient(135deg,#5E5332,#C5A059);
+        color: #fff; border-color: #5E5332;
+    }
+
+    /* ── Rate Input with ₹ ── */
+    .rate-wrap { position: relative; }
+    .rate-wrap .rupee {
+        position: absolute; left: 13px; top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700; font-size: 14px; color: #5E5332;
+    }
+    .rate-wrap input { padding-left: 30px !important; }
+
+    /* ── Availability Type ── */
+    .avail-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .avail-tab { position: relative; }
+    .avail-tab input { position: absolute; opacity: 0; }
+    .avail-tab label {
+        display: inline-block; padding: 8px 16px;
+        border: 1.5px solid rgba(10,12,16,0.12);
+        border-radius: 20px; font-size: 12.5px; font-weight: 700;
+        color: #606875; cursor: pointer; transition: all .25s;
+        background: #F8F9F5;
+    }
+    .avail-tab label:hover { border-color: #C5A059; color: #5E5332; }
+    .avail-tab input:checked + label {
+        background: linear-gradient(135deg,#1565C0,#42A5F5);
+        color: #fff; border-color: #1565C0;
+    }
+
+    /* ── Working Days ── */
+    .days-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .day-chip { position: relative; }
+    .day-chip input { position: absolute; opacity: 0; }
+    .day-chip label {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 42px; height: 42px;
+        border: 1.5px solid rgba(10,12,16,0.12);
+        border-radius: 50%; font-size: 11px; font-weight: 700;
+        color: #606875; cursor: pointer; transition: all .25s;
+        background: #F8F9F5;
+    }
+    .day-chip label:hover { border-color: #C5A059; color: #5E5332; }
+    .day-chip input:checked + label {
+        background: linear-gradient(135deg,#5E5332,#C5A059);
+        color: #fff; border-color: #5E5332;
+    }
+
+    /* ── Toggle ── */
+    .toggle-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 18px;
+        background: #F4F5EF; border-radius: 8px;
+        border: 1px solid rgba(10,12,16,0.08);
+    }
+    .toggle-label { font-size: 13.5px; font-weight: 700; color: #0A0C10; }
+    .toggle-sub  { font-size: 12px; color: #606875; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute; cursor: pointer;
+        top:0; left:0; right:0; bottom:0;
+        background: #ccc; border-radius: 24px; transition: .4s;
+    }
+    .slider::before {
+        content:''; position:absolute;
+        height:18px; width:18px;
+        left:3px; bottom:3px;
+        background:#fff; border-radius:50%; transition:.4s;
+    }
+    input:checked + .slider { background: #5E5332; }
+    input:checked + .slider::before { transform: translateX(20px); }
+
+    /* ── Submit ── */
+    .btn-submit-provider {
+        width: 100%;
+        background: linear-gradient(135deg, #5E5332 0%, #C5A059 100%);
+        color: #fff; border: none;
+        padding: 16px; border-radius: 8px;
+        font-size: 13px; font-weight: 700;
+        letter-spacing: 1.5px; text-transform: uppercase;
+        cursor: pointer; transition: all 0.3s; margin-top: 8px;
+        box-shadow: 0 6px 20px rgba(197,160,89,0.28);
+    }
+    .btn-submit-provider:hover {
+        background: linear-gradient(135deg, #C5A059 0%, #5E5332 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(197,160,89,0.42);
+    }
+
+    @media (max-width: 640px) {
+        .form-row, .form-row-3 { grid-template-columns: 1fr; }
+        .reg-body { padding: 20px 16px; }
+        .section-block { padding: 18px 16px; }
+    }
+</style>
+
+<div class="reg-container">
+    <div class="reg-header">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#8A6D3B; margin-bottom:8px;">
+            ✦ Service Provider Registration ✦
+        </div>
+        <h2>{% if existing %}Update Your Service Profile{% else %}Register as a Service Provider{% endif %}</h2>
+        <p>List your trade, set your rates, and get discovered by residents in Sangamner.</p>
+    </div>
+
+    <div class="reg-body">
+        <form method="POST" action="{{ url_for('service_register') }}" enctype="multipart/form-data">
+
+            <!-- ═══════════════════════════════════════════
+                 A. PERSONAL INFORMATION
+            ═══════════════════════════════════════════ -->
+            <div class="section-block">
+                <div class="section-label">
+                    <div class="sec-icon">👤</div>
+                    A. Personal Information
+                </div>
+
+                <!-- Profile Photo -->
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label>Profile Photo <span class="opt">(optional)</span></label>
+                    <div class="photo-upload-wrap">
+                        <div class="photo-preview" id="photoPreview">
+                            {% if existing and existing.profile_photo %}
+                                <img src="{{ url_for('static', filename=existing.profile_photo) }}" alt="Profile">
+                            {% else %}
+                                📷
+                            {% endif %}
+                        </div>
+                        <label class="photo-upload-btn">
+                            📁 Choose Photo
+                            <input type="file" name="profile_photo" accept="image/*" id="photoInput" onchange="previewPhoto(this)">
+                        </label>
+                        <span style="font-size:12px; color:#888;">JPG, PNG, WEBP — max 5MB</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="name" placeholder="e.g. Rohit Goykar"
+                            value="{{ user.name if user and user.name else (user.username if user else '') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number *</label>
+                        <input type="tel" name="contact" placeholder="e.g. 8767865434"
+                            value="{{ user.contact if user and user.contact else '' }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address <span class="opt">(optional)</span></label>
+                        <input type="email" name="email" placeholder="e.g. rohit@gmail.com"
+                            value="{{ user.email if user and user.email else '' }}">
+                    </div>
+                    {% if not user %}
+                    <div class="form-group">
+                        <label>Account Password *</label>
+                        <input type="password" name="password" placeholder="Create your password" required>
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" value="{{ user.username }}" disabled style="background:#EFEFEF; color:#888;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════
+                 B. SERVICE INFORMATION
+            ═══════════════════════════════════════════ -->
+            <div class="section-block">
+                <div class="section-label">
+                    <div class="sec-icon">🔧</div>
+                    B. Service Information
+                </div>
+
+                <!-- Main Service Category -->
+                <div class="form-group">
+                    <label>Main Service Category *</label>
+                    <div class="cat-select-grid">
+                        {% for cat in categories %}
+                        <div class="cat-select-option">
+                            <input type="radio" name="trade_category" id="cat_{{ cat.key }}" value="{{ cat.key }}"
+                                {% if (existing and existing.trade_category == cat.key) or (selected_category and selected_category == cat.key) or (not existing and not selected_category and loop.first) %}checked{% endif %} required>
+                            <label for="cat_{{ cat.key }}">
+                                <span class="ci">{{ cat.icon }}</span>
+                                <span class="cl">{{ cat.label }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-row" style="margin-top:16px;">
+                    <div class="form-group">
+                        <label>Specific Service Type</label>
+                        <input type="text" name="trade_subcategory"
+                            placeholder="e.g. Pipe Leakage, Tap Fitting, Drainage"
+                            value="{{ existing.trade_subcategory if existing else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Years of Experience</label>
+                        <input type="number" name="experience_years" min="0" max="60"
+                            value="{{ existing.experience_years if existing else 0 }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Skills &amp; Expertise</label>
+                    <input type="text" name="skills"
+                        placeholder="e.g. Leak Repair, Water Tank Cleaning, Pipe Fitting, Drainage Unblocking"
+                        value="{{ existing.skills if existing else '' }}">
+                    <span style="font-size:11.5px; color:#888; margin-top:3px;">Separate multiple skills with commas</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Description of Services</label>
+                    <textarea name="bio"
+                        placeholder="Describe your experience, the types of work you do, quality guarantee, and why customers should choose you...">{{ existing.bio if existing else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Previous Work Photos <span class="opt">(optional — URL or upload)</span></label>
+                    <input type="text" name="portfolio_url"
+                        placeholder="e.g. https://photos.google.com/yourwork or Instagram link"
+                        value="{{ existing.portfolio_url if existing else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Certifications / Licenses <span class="opt">(optional)</span></label>
+                    <input type="text" name="certifications"
+                        placeholder="e.g. ITI Certified, Govt Trade License, CTTC"
+                        value="{{ existing.certifications if existing else '' }}">
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════
+                 C. PRICING
+            ═══════════════════════════════════════════ -->
+            <div class="section-block">
+                <div class="section-label">
+                    <div class="sec-icon">💰</div>
+                    C. Pricing
+                </div>
+
+                <div class="form-group">
+                    <label>Pricing Type *</label>
+                    <div class="pricing-tabs">
+                        {% for pt in ['Per Hour', 'Per Day', 'Per Visit', 'Per Job', 'Negotiable'] %}
+                        <div class="pricing-tab">
+                            <input type="radio" name="pricing_type" id="pt_{{ loop.index }}" value="{{ pt }}"
+                                {% if (existing and existing.pricing_type == pt) or (not existing and pt == 'Per Hour') %}checked{% endif %}>
+                            <label for="pt_{{ loop.index }}">{{ pt }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Rate Per Hour (₹)</label>
+                        <div class="rate-wrap">
+                            <span class="rupee">₹</span>
+                            <input type="number" name="rate_per_hour" min="0" step="10"
+                                placeholder="250"
+                                value="{{ existing.rate_per_hour|int if existing and existing.rate_per_hour else 250 }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Charge (₹)</label>
+                        <div class="rate-wrap">
+                            <span class="rupee">₹</span>
+                            <input type="number" name="min_charge" min="0" step="10"
+                                placeholder="200"
+                                value="{{ existing.min_charge|int if existing and existing.min_charge else '' }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Maximum Charge (₹)</label>
+                        <div class="rate-wrap">
+                            <span class="rupee">₹</span>
+                            <input type="number" name="max_charge" min="0" step="10"
+                                placeholder="2000"
+                                value="{{ existing.max_charge|int if existing and existing.max_charge else '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Flat Visit / Call Charge (₹)</label>
+                        <div class="rate-wrap">
+                            <span class="rupee">₹</span>
+                            <input type="number" name="rate_per_visit" min="0" step="10"
+                                placeholder="400"
+                                value="{{ existing.rate_per_visit|int if existing and existing.rate_per_visit else 400 }}">
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════
+                 D. LOCATION & AVAILABILITY
+            ═══════════════════════════════════════════ -->
+            <div class="section-block">
+                <div class="section-label">
+                    <div class="sec-icon">📍</div>
+                    D. Location &amp; Availability
+                </div>
+
+                <div class="form-group">
+                    <label>Service Area / Localities</label>
+                    <input type="text" name="service_area"
+                        placeholder="e.g. Sangamner &amp; nearby areas"
+                        value="{{ existing.service_area if existing else 'Sangamner & nearby areas' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Availability Type *</label>
+                    <div class="avail-tabs">
+                        {% for at in ['Full-time', 'Part-time', 'Weekends', 'On-call'] %}
+                        <div class="avail-tab">
+                            <input type="radio" name="availability_type" id="at_{{ loop.index }}" value="{{ at }}"
+                                {% if (existing and existing.availability_type == at) or (not existing and at == 'Full-time') %}checked{% endif %}>
+                            <label for="at_{{ loop.index }}">{{ at }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Working Days</label>
+                    {% set saved_days = (existing.work_days if existing and existing.work_days else 'Mon,Tue,Wed,Thu,Fri,Sat').split(',') %}
+                    <div class="days-grid">
+                        {% for day in [('Mon','Mon'),('Tue','Tue'),('Wed','Wed'),('Thu','Thu'),('Fri','Fri'),('Sat','Sat'),('Sun','Sun')] %}
+                        <div class="day-chip">
+                            <input type="checkbox" name="work_days" id="wd_{{ day[0] }}" value="{{ day[0] }}"
+                                {% if day[0] in saved_days %}checked{% endif %}>
+                            <label for="wd_{{ day[0] }}">{{ day[1] }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Working Hours <span class="opt">(optional)</span></label>
+                    <input type="text" name="availability"
+                        placeholder="e.g. 8:00 AM – 8:00 PM"
+                        value="{{ existing.availability if existing else '8:00 AM – 8:00 PM' }}">
+                </div>
+
+                <!-- Available Toggle -->
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">Active &amp; Available for Work</div>
+                        <div class="toggle-sub">Customers will see a live green "Available Today" badge on your profile</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_available"
+                            {% if not existing or existing.is_available %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-submit-provider">
+                {% if existing %}✓ Save &amp; Update Profile{% else %}🚀 Register &amp; List My Services{% endif %}
+            </button>
+
+            <p style="text-align:center; margin-top:16px; font-size:12.5px; color:#888;">
+                <a href="{{ url_for('services_categories') }}" style="color:#5E5332; text-decoration:none;">
+                    ← Back to Services Marketplace
+                </a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewPhoto(input) {
+    const preview = document.getElementById('photoPreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endmacro %}
+
+{% block content %}
+{{ render_service_form() }}
+{% endblock %}
+
+{% block auth_content %}
+{{ render_service_form() }}
+{% endblock %}

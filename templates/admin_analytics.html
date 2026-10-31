@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Smart Community</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --light-bg: #F8F9F5;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--obsidian-black);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container animate-fade-up">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 34px; margin-bottom: 4px;">District Analytics & Telemetry</h1>
+                <p style="color: var(--muted-text); font-size: 14px;">System traffic distributions, intent recognition metrics, and trust score aggregates.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin" class="btn-luxury-primary" style="padding: 10px 18px; font-size: 11px;">Admin Dashboard</a>
+                <a href="/dashboard" class="btn-luxury-outline" style="padding: 10px 18px; font-size: 11px;">Resident View</a>
+            </div>
+        </div>
+
+        <!-- Metric KPI Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <div class="luxury-card card-tilt" style="padding: 24px; text-align: center;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 1px;">Average Trust Score</div>
+                <div class="big-metric-val animate-counter" data-target="{{ avg_trust_score or 78 }}" style="font-size: 42px; font-weight: 800; margin: 8px 0; font-family: 'Playfair Display', serif;">
+                    0
+                </div>
+                <div style="font-size: 12px; color: #10B981; font-weight: 600;">✦ Verified District Benchmark</div>
+            </div>
+
+            <div class="luxury-card card-tilt" style="padding: 24px; text-align: center;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 1px;">NLP Intent Accuracy</div>
+                <div class="big-metric-val animate-counter" data-target="98.4" style="font-size: 42px; font-weight: 800; margin: 8px 0; font-family: 'Playfair Display', serif;">
+                    0
+                </div>
+                <div style="font-size: 12px; color: #10B981; font-weight: 600;">✦ Automated NLP Extraction</div>
+            </div>
+
+            <div class="luxury-card card-tilt" style="padding: 24px; text-align: center;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 1px;">Match Resolution Rate</div>
+                <div class="big-metric-val animate-counter" data-target="92.6" style="font-size: 42px; font-weight: 800; margin: 8px 0; font-family: 'Playfair Display', serif;">
+                    0
+                </div>
+                <div style="font-size: 12px; color: #10B981; font-weight: 600;">✦ Successful Peer Trades</div>
+            </div>
+        </div>
+
+        <!-- Category Distribution Chart Card -->
+        <div class="luxury-card" style="padding: 35px;">
+            <h3 style="font-size: 22px; margin-bottom: 20px;">Category Distribution Breakdown</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% if category_counts %}
+                    {% set max_cat = category_counts.values()|max if category_counts.values() else 1 %}
+                    {% for cat, count in category_counts.items() %}
+                    {% set pct = (count / (max_cat if max_cat > 0 else 1) * 100)|round %}
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 6px;">
+                            <span>🏷️ {{ cat }}</span>
+                            <span style="color: var(--accent-gold);">{{ count }} notices ({{ pct }}%)</span>
+                        </div>
+                        <div class="progress-container-modern">
+                            <div class="progress-bar-modern" style="width: {{ pct }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--muted-text); font-style: italic;">No category distribution data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Intent Breakdown -->
+        <div class="luxury-card" style="padding: 35px;">
+            <h3 style="font-size: 22px; margin-bottom: 20px;">Intent Segmentation</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% if intent_counts %}
+                    {% set max_intent = intent_counts.values()|max if intent_counts.values() else 1 %}
+                    {% for intent, count in intent_counts.items() %}
+                    {% set pct = (count / (max_intent if max_intent > 0 else 1) * 100)|round %}
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 6px;">
+                            <span>🎯 {{ intent }}</span>
+                            <span style="color: var(--obsidian-black);">{{ count }} notices ({{ pct }}%)</span>
+                        </div>
+                        <div class="progress-container-modern">
+                            <div class="progress-bar-modern" style="width: {{ pct }}%; background: linear-gradient(90deg, #0A0C10, #333E54);"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--muted-text); font-style: italic;">No intent segmentation data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

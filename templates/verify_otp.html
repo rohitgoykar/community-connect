@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Access Pass - Smart Community</title>
+    
+    <!-- Premium Google Fonts Pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --obsidian-black: #0A0C10; 
+            --accent-gold-light: #C5A059;
+            --accent-gold: #5E5332;
+            --accent-gold-dark: #1E1A10;
+            --muted-text: #8E94A0;
+            --transition-bounce: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            --transition-smooth: all 0.35s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent !important;
+            color: var(--obsidian-black);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            perspective: 1200px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 35px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: #0A0C10;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 13px;
+            color: #5E5332;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        /* Golden Ticket Pass (Light Mode) */
+        .ticket-form {
+            width: 100%;
+            max-width: 680px;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid var(--accent-gold-light);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08), 0 0 30px rgba(197, 160, 89, 0.15);
+            border-radius: 12px;
+            padding: 40px;
+            position: relative;
+            animation: scaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: var(--transition-bounce);
+        }
+
+        .ticket-form:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.12), 0 0 40px rgba(197, 160, 89, 0.25);
+        }
+
+        /* 6-box OTP digits */
+        .otp-boxes-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 30px 0 25px 0;
+        }
+
+        .otp-box {
+            width: 52px;
+            height: 60px;
+            background: #FFFFFF;
+            border: 2px solid rgba(197, 160, 89, 0.4);
+            border-radius: 6px;
+            color: #0A0C10;
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', monospace;
+            text-align: center;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .otp-box:focus {
+            background: #FFFFFF;
+            border-color: #5E5332;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+            transform: scale(1.08);
+        }
+
+        .email-pill {
+            background: rgba(10, 12, 16, 0.05);
+            border: 1px solid rgba(10, 12, 16, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4A5568;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>Two-Factor Verification</h1>
+        <p>✦ High-Trust Security Pass ✦</p>
+    </div>
+
+    <div class="ticket-form">
+        <div style="text-align: center;">
+            <div class="email-pill">
+                <span>🔐</span>
+                <span>Code sent to: <strong style="color: #C5A059;">{{ masked_email or user.email if user else 'your registered email' }}</strong></span>
+            </div>
+        </div>
+
+        {% if error %}
+        <div style="margin: 22px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.18); color: #FCA5A5; text-align: center;">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/verify-otp" id="otpForm">
+            <!-- Hidden actual field for Flask -->
+            <input type="hidden" name="otp" id="fullOtp">
+
+            <div class="otp-boxes-grid">
+                <input type="text" class="otp-box" maxlength="1" autofocus data-index="0" autocomplete="one-time-code">
+                <input type="text" class="otp-box" maxlength="1" data-index="1">
+                <input type="text" class="otp-box" maxlength="1" data-index="2">
+                <input type="text" class="otp-box" maxlength="1" data-index="3">
+                <input type="text" class="otp-box" maxlength="1" data-index="4">
+                <input type="text" class="otp-box" maxlength="1" data-index="5">
+            </div>
+
+            <button type="submit" class="btn-luxury-gold" style="width: 100%; padding: 16px; font-size: 13px; letter-spacing: 2px;">
+                Verify Pass & Access Portal &rarr;
+            </button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 13px; color: var(--muted-text);">
+            <a href="/login" style="color: #4A5568; text-decoration: none; font-weight: 600;">&larr; Back to Login</a>
+            <a href="/resend-otp" id="resendBtn" style="color: #5E5332; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                <span>🔄</span> Resend Code
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+    <script>
+        const boxes = document.querySelectorAll('.otp-box');
+        const form = document.getElementById('otpForm');
+        const fullOtpInput = document.getElementById('fullOtp');
+
+        boxes.forEach((box, i) => {
+            box.addEventListener('input', (e) => {
+                if (box.value.length === 1 && i < boxes.length - 1) {
+                    boxes[i + 1].focus();
+                }
+                syncOtp();
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && box.value === '' && i > 0) {
+                    boxes[i - 1].focus();
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text').trim();
+                if (/^\d+$/.test(paste)) {
+                    for (let j = 0; j < Math.min(paste.length, boxes.length); j++) {
+                        boxes[j].value = paste[j];
+                    }
+                    if (paste.length < boxes.length) {
+                        boxes[paste.length].focus();
+                    } else {
+                        boxes[boxes.length - 1].focus();
+                    }
+                    syncOtp();
+                }
+            });
+        });
+
+        function syncOtp() {
+            let combined = '';
+            boxes.forEach(b => combined += b.value);
+            fullOtpInput.value = combined;
+        }
+
+        form.addEventListener('submit', (e) => {
+            syncOtp();
+            if (fullOtpInput.value.length < 6) {
+                e.preventDefault();
+                if (window.showModernToast) {
+                    window.showModernToast('Please enter all 6 digits of your OTP', 'rose');
+                } else {
+                    alert('Please enter all 6 digits of your OTP');
+                }
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

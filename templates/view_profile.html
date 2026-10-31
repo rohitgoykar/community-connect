@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.name or profile_user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .profile-card-view {
+        background-color: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 40px;
+        position: relative;
+        box-shadow: 0 20px 50px rgba(10, 12, 16, 0.05);
+        animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .profile-card-view::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light), var(--accent-gold));
+    }
+
+    .avatar-large {
+        width: 90px;
+        height: 90px;
+        background-color: var(--obsidian-black);
+        color: var(--accent-gold-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 38px;
+        font-weight: 800;
+        border: 2px solid var(--accent-gold-light);
+        border-radius: 50%;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-top: 25px;
+    }
+
+    .detail-block {
+        background: #F8F9F5;
+        border: 1px solid var(--border-color);
+        padding: 18px 22px;
+        border-radius: 4px;
+    }
+
+    .detail-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--accent-gold);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .detail-value {
+        font-size: 15px;
+        color: var(--obsidian-black);
+        font-weight: 600;
+    }
+</style>
+
+<div class="profile-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h2 style="font-size: 30px; margin: 0;">Resident Profile</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn-luxury-outline" style="padding: 8px 18px; font-size: 11px;">&larr; Dashboard</a>
+    </div>
+
+    <div class="profile-card-view">
+        <!-- Main Header -->
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <div class="avatar-large">
+                {{ (profile_user.name or profile_user.username)[0]|upper }}
+            </div>
+            <div>
+                <h3 style="font-size: 28px; margin-bottom: 6px;">{{ profile_user.name or profile_user.username }}</h3>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span class="badge-luxury badge-gold">
+                        <span class="pulse-dot"></span> Trust Score: {{ profile_user.trust_score }}%
+                    </span>
+                    <span class="badge-luxury badge-dark">
+                        ⭐ {{ "%.1f"|format(profile_user.rating or 5.0) }} / 5 ({{ profile_user.total_ratings or 0 }} Reviews)
+                    </span>
+                    {% if profile_user.blood_group %}
+                    <span class="badge-luxury badge-rose">🩸 Blood Group: {{ profile_user.blood_group }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: 0; height: 1px; background: rgba(10, 12, 16, 0.08); margin: 30px 0;">
+
+        <!-- Structured Attributes Grid -->
+        <div class="details-grid">
+            <div class="detail-block">
+                <span class="detail-label">District Location</span>
+                <span class="detail-value">📍 {{ profile_user.location or 'Not specified' }}</span>
+            </div>
+
+            <div class="detail-block">
+                <span class="detail-label">Direct Contact</span>
+                <span class="detail-value">📞 {{ profile_user.contact or 'Available via Portal Messenger' }}</span>
+            </div>
+
+            <div class="detail-block" style="grid-column: span 2;">
+                <span class="detail-label">Skills & Service Offerings</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                    {% if profile_user.skills %}
+                        {% for s in profile_user.skills.split(',') %}
+                        <span class="tag-pill">✓ {{ s.strip() }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: var(--muted-text); font-size: 13.5px; font-style: italic;">No specific skills listed</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-block" style="grid-column: span 2;">
+                <span class="detail-label">Community Interests</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                    {% if profile_user.interests %}
+                        {% for i in profile_user.interests.split(',') %}
+                        <span class="tag-pill" style="background: rgba(197, 160, 89, 0.1);">✦ {{ i.strip() }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: var(--muted-text); font-size: 13.5px; font-style: italic;">No specific interests listed</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap;">
+            {% if profile_user.id != session.get('user_id') %}
+            <button onclick="startChat({{ profile_user.id }}, '{{ (profile_user.name or profile_user.username)|replace("'", "\\'") }}')" class="btn-luxury-primary" style="padding: 14px 28px;">
+                🔒 Start Private Chat &rarr;
+            </button>
+            <a href="{{ url_for('feedback') }}?user_id={{ profile_user.id }}" class="btn-luxury-gold" style="padding: 14px 24px;">
+                ⭐ Leave Feedback
+            </a>
+            {% else %}
+            <a href="{{ url_for('profile_setup') }}" class="btn-luxury-gold" style="padding: 14px 28px;">
+                ✎ Modify My Profile
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function startChat(userId, userName) {
+    window.location.href = `/communication?user_id=${userId}`;
+}
+</script>
+{% endblock %}

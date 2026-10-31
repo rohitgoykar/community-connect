@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% block title %}{{ category.label }}s Near You{% endblock %}
+
+{% macro render_browse_content() %}
+<style>
+    .browse-header {
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 12px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    .browse-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5E5332, #C5A059);
+    }
+    .cat-title {
+        display: flex; align-items: center; gap: 14px;
+    }
+    .cat-icon-lg { font-size: 46px; }
+    .cat-title h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px; color: #0A0C10; margin: 0;
+    }
+    .cat-title p { color: #606875; font-size: 13.5px; margin: 4px 0 0; }
+
+    /* Provider card grid */
+    .providers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 22px;
+    }
+
+    .provider-card {
+        background: rgba(255,255,255,0.93);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+        transition: all .32s cubic-bezier(0.16,1,0.3,1);
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+    }
+    .provider-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+        border-color: rgba(197,160,89,0.4);
+    }
+    .provider-card-top {
+        background: linear-gradient(135deg, #FAFBF8 0%, #EEF2EB 100%);
+        border-bottom: 1px solid rgba(10, 12, 16, 0.08);
+        padding: 22px 22px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .prov-avatar {
+        width: 54px; height: 54px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #5E5332, #C5A059);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 22px; font-weight: 700;
+        flex-shrink: 0;
+        border: 2px solid rgba(197,160,89,0.5);
+    }
+    .prov-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px; color: #0A0C10; font-weight: 700;
+    }
+    .prov-sub { font-size: 12px; color: #606875; margin-top: 2px; }
+    .avail-dot {
+        display: inline-block;
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #2ecc71; margin-right: 4px;
+        box-shadow: 0 0 6px #2ecc71;
+    }
+
+    .provider-card-body {
+        padding: 18px 20px;
+        flex: 1; display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .rate-row {
+        display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .rate-badge {
+        background: rgba(197,160,89,0.12);
+        border: 1px solid rgba(197,160,89,0.25);
+        color: #5E5332;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px; font-weight: 700;
+    }
+    .rate-badge span { font-size: 15px; color: #0A0C10; }
+
+    .detail-row {
+        display: flex; align-items: flex-start; gap: 8px;
+        font-size: 12.5px; color: #606875;
+    }
+    .detail-row svg { flex-shrink: 0; margin-top: 1px; }
+
+    .stars-row { display: flex; align-items: center; gap: 4px; }
+    .star { color: #e6a117; font-size: 13px; }
+    .star.empty { color: #d0d0d0; }
+
+    .provider-card-foot {
+        padding: 14px 20px;
+        border-top: 1px solid rgba(10,12,16,0.06);
+        display: flex; gap: 10px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 70px 30px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.7);
+    }
+    .empty-icon { font-size: 52px; margin-bottom: 16px; }
+
+    /* Dual Action Choices Bar */
+    .trade-action-showcase {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 249, 245, 0.96) 100%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        border-radius: 14px;
+        padding: 24px 28px;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .trade-action-showcase::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5E5332, #C5A059, #5E5332);
+    }
+
+    .trade-action-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .trade-action-head h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 20px;
+        color: #0A0C10;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(197, 160, 89, 0.15);
+        color: #8A6D3B;
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .dual-action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .btn-action-tile {
+        padding: 18px 22px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 1. Service Provider Button (Light Mode) */
+    .btn-tile-provider {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FAFBF7 100%);
+        border: 2px solid #C5A059;
+        color: #0A0C10;
+        box-shadow: 0 6px 22px rgba(197, 160, 89, 0.16);
+    }
+
+    .btn-tile-provider:hover {
+        background: #FFFFFF;
+        transform: translateY(-3px);
+        border-color: #5E5332;
+        box-shadow: 0 12px 30px rgba(197, 160, 89, 0.32);
+        color: #0A0C10;
+    }
+
+    /* 2. Service Required / Needed Button (Light Mode) */
+    .btn-tile-seeker {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F7FA 100%);
+        border: 1.5px solid rgba(10, 12, 16, 0.15);
+        color: #0A0C10;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-tile-seeker:hover {
+        background: #FFFFFF;
+        border-color: #C5A059;
+        transform: translateY(-3px);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+        color: #0A0C10;
+    }
+
+    .btn-tile-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .btn-tile-provider .btn-tile-icon {
+        background: rgba(197, 160, 89, 0.15);
+        border: 1px solid rgba(197, 160, 89, 0.35);
+    }
+
+    .btn-tile-seeker .btn-tile-icon {
+        background: rgba(21, 101, 192, 0.1);
+        border: 1px solid rgba(21, 101, 192, 0.25);
+    }
+
+    .btn-tile-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .btn-tile-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 3px;
+    }
+
+    .btn-tile-provider .btn-tile-label { color: #8A6D3B; }
+    .btn-tile-seeker .btn-tile-label { color: #1565C0; }
+
+    .btn-tile-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .btn-tile-provider .btn-tile-title { color: #0A0C10; }
+    .btn-tile-seeker .btn-tile-title { color: #0A0C10; }
+
+    .btn-tile-desc {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .btn-tile-provider .btn-tile-desc { color: #555E6B; }
+    .btn-tile-seeker .btn-tile-desc { color: #606875; }
+
+    .btn-tile-arrow {
+        font-size: 18px;
+        font-weight: 800;
+        margin-left: auto;
+        opacity: 0.8;
+        transition: transform 0.25s;
+    }
+
+    .btn-action-tile:hover .btn-tile-arrow {
+        transform: translateX(4px);
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .dual-action-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div style="max-width: 1080px; margin: 0 auto; padding: 0 16px 60px;">
+
+    <!-- Header -->
+    <div class="browse-header">
+        <div class="cat-title">
+            <div class="cat-icon-lg">{{ category.icon }}</div>
+            <div>
+                <h1>{{ category.label }}s</h1>
+                <p>{{ category.desc }} — <strong>{{ providers|length }}</strong> provider(s) registered</p>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="text" class="form-control" style="min-width:200px; font-size:13px; padding:9px 14px;"
+                   placeholder="Search by name, area..." data-live-filter=".provider-card">
+            <a href="{{ url_for('services_categories') }}" class="btn btn-outline" style="font-size:11px; padding:9px 14px;">
+                ← All Categories
+            </a>
+        </div>
+    </div>
+
+    <!-- Dual Action Selection: 1. Service Provider (New Tab) | 2. Service Required / Needed -->
+    <div class="trade-action-showcase">
+        <div class="trade-action-head">
+            <div>
+                <span class="action-badge-pill">✦ Action Options</span>
+                <h3 style="margin-top:6px;">Choose Your Role for {{ category.label }}</h3>
+            </div>
+            <p style="margin:0; font-size:13px; color:#606875;">
+                Select whether you are offering {{ category.label }} services or looking to hire one in Sangamner.
+            </p>
+        </div>
+
+        <div class="dual-action-buttons">
+            <!-- 1. Service Provider (Same Tab) -->
+            <a href="{{ url_for('service_register') }}?category={{ category.key }}" class="btn-action-tile btn-tile-provider">
+                <div class="btn-tile-icon">{{ category.icon }}</div>
+                <div class="btn-tile-content">
+                    <span class="btn-tile-label">Option 1</span>
+                    <span class="btn-tile-title">1. Service Provider</span>
+                    <span class="btn-tile-desc">Register or update your {{ category.label }} profile & set your rates (Opens in new tab ↗)</span>
+                </div>
+                <span class="btn-tile-arrow">&rarr;</span>
+            </a>
+
+            <!-- 2. Service Required / Needed -->
+            <a href="{{ url_for('request_service') }}?category={{ category.key }}" class="btn-action-tile btn-tile-seeker">
+                <div class="btn-tile-icon">📋</div>
+                <div class="btn-tile-content">
+                    <span class="btn-tile-label">Option 2</span>
+                    <span class="btn-tile-title">2. Service Required / Needed</span>
+                    <span class="btn-tile-desc">Fill in your requirements to find a suitable service provider in Sangamner</span>
+                </div>
+                <span class="btn-tile-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Provider Cards -->
+    {% if providers %}
+    <div class="providers-grid">
+        {% for sp in providers %}
+        <div class="provider-card card-tilt">
+            <!-- Card Top: Avatar + Name -->
+            <div class="provider-card-top">
+                <div class="prov-avatar">{{ (sp.user.name or sp.user.username)[:1]|upper }}</div>
+                <div>
+                    <div class="prov-name">{{ sp.user.name or sp.user.username }}</div>
+                    <div class="prov-sub">
+                        {% if sp.is_available %}
+                            <span class="avail-dot"></span>Available Now
+                        {% else %}
+                            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e74c3c;margin-right:4px;"></span>Not Available
+                        {% endif %}
+                        {% if sp.is_verified %}
+                            &bull; <span style="color:#C5A059;">✓ Verified</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="provider-card-body">
+                <!-- Rates -->
+                <div class="rate-row">
+                    {% if sp.rate_per_hour > 0 %}
+                    <div class="rate-badge">₹<span>{{ sp.rate_per_hour|int }}</span>/hr</div>
+                    {% endif %}
+                    {% if sp.rate_per_visit > 0 %}
+                    <div class="rate-badge">₹<span>{{ sp.rate_per_visit|int }}</span>/visit</div>
+                    {% endif %}
+                    {% if sp.rate_per_hour == 0 and sp.rate_per_visit == 0 %}
+                    <div class="rate-badge" style="color:#606875;">Rate on Request</div>
+                    {% endif %}
+                </div>
+
+                <!-- Stars -->
+                <div class="stars-row">
+                    {% set rating = sp.user.rating|default(0) %}
+                    {% for i in range(5) %}
+                        <span class="star {% if i >= rating|int %}empty{% endif %}">★</span>
+                    {% endfor %}
+                    <span style="font-size:11px; color:#606875; margin-left:4px;">({{ sp.user.total_ratings|default(0) }} reviews)</span>
+                </div>
+
+                <!-- Bio -->
+                {% if sp.bio %}
+                <div style="font-size:13px; color:#444; line-height:1.55;">{{ sp.bio[:110] }}{% if sp.bio|length > 110 %}…{% endif %}</div>
+                {% endif %}
+
+                <!-- Details -->
+                {% if sp.experience_years > 0 %}
+                <div class="detail-row">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ sp.experience_years }} yr{% if sp.experience_years != 1 %}s{% endif %} experience
+                </div>
+                {% endif %}
+                {% if sp.service_area %}
+                <div class="detail-row">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ sp.service_area }}
+                </div>
+                {% endif %}
+                {% if sp.availability %}
+                <div class="detail-row">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ sp.availability }}
+                </div>
+                {% endif %}
+                <!-- Trust score -->
+                <div style="margin-top:4px;">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; margin-bottom:4px;">
+                        <span>Trust Score</span><span style="font-weight:700; color:#2e7d32;">{{ sp.user.trust_score }}%</span>
+                    </div>
+                    <div style="background:#f0f0f0; border-radius:10px; height:6px; overflow:hidden;">
+                        <div style="width:{{ sp.user.trust_score }}%; height:100%; background:linear-gradient(90deg,#5E5332,#C5A059); border-radius:10px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="provider-card-foot">
+                <a href="{{ url_for('service_provider_profile', user_id=sp.user.id) }}"
+                   class="btn btn-outline" style="flex:1; font-size:11px; padding:9px; text-align:center;">
+                   View Profile
+                </a>
+                {% if user %}
+                <a href="{{ url_for('communication') }}?user_id={{ sp.user.id }}"
+                   class="btn btn-gold" style="flex:1; font-size:11px; padding:9px; text-align:center;">
+                   💬 Private Message
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-gold"
+                   style="flex:1; font-size:11px; padding:9px; text-align:center;">
+                   Login to Contact
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">{{ category.icon }}</div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:22px; color:#0A0C10; margin-bottom:10px;">
+            No {{ category.label }}s Registered Yet
+        </h3>
+        <p style="color:#606875; max-width:420px; margin:0 auto 24px; font-size:14px; line-height:1.6;">
+            Be the first to register as a {{ category.label }} on Smart Community and start receiving jobs from your neighborhood.
+        </p>
+        {% if user %}
+        <a href="{{ url_for('service_register') }}" class="btn btn-gold">Register as a {{ category.label }}</a>
+        {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-gold">Create Account & Register</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% block content %}
+{{ render_browse_content() }}
+{% endblock %}
+
+{% block auth_content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 24px 16px; width: 100%;">
+    <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.7);">
+        <a href="{{ url_for('services_categories') }}" style="color: #5E5332; text-decoration: none; font-weight: 600; font-size: 14px;">&larr; All Services</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline" style="padding: 6px 14px; font-size: 12px;">Sign In</a>
+            <a href="{{ url_for('register') }}" class="btn btn-sm btn-gold" style="padding: 6px 14px; font-size: 12px;">Register</a>
+        </div>
+    </div>
+    {{ render_browse_content() }}
+</div>
+{% endblock %}

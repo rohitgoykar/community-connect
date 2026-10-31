@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Notice Matches - Smart Community{% endblock %}
+
+{% block content %}
+<style>
+    .find-matches-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .notice-context-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 28px 32px;
+        margin-bottom: 30px;
+        position: relative;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .notice-context-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--accent-gold-light), var(--accent-gold));
+        border-radius: 4px 0 0 4px;
+    }
+
+    .notice-badge-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .notice-desc-text {
+        font-family: 'Playfair Display', serif;
+        font-size: 20px;
+        color: var(--obsidian-black);
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 16px;
+    }
+
+    .match-item-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: 1fr 220px;
+        gap: 24px;
+        align-items: center;
+        transition: var(--transition-smooth);
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .match-item-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(10, 12, 16, 0.06);
+        border-color: rgba(197, 160, 89, 0.4);
+    }
+
+    .match-user-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--obsidian-black);
+        margin-bottom: 6px;
+    }
+
+    .match-progress-container {
+        background-color: #F4F5EF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 20px;
+        height: 20px;
+        width: 100%;
+        max-width: 380px;
+        position: relative;
+        overflow: hidden;
+        margin: 10px 0 12px 0;
+    }
+
+    .match-progress-fill {
+        background: linear-gradient(90deg, #5E5332, #C5A059);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 12px;
+        color: #FFFFFF;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: width 1s ease;
+    }
+
+    .match-reasons-list {
+        background: #F8F9F5;
+        border-left: 3px solid #C5A059;
+        padding: 10px 14px;
+        margin-top: 10px;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .match-reasons-list ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .match-reasons-list li {
+        font-size: 12.5px;
+        color: var(--obsidian-black);
+    }
+
+    @media (max-width: 768px) {
+        .match-item-card {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="find-matches-container">
+    <!-- Notice Banner -->
+    <div class="notice-context-card">
+        <div class="notice-badge-row">
+            <span class="badge badge-gold">TARGET NOTICE #{{ post.id }}</span>
+            <span class="badge badge-dark">{{ post.intent or 'Need' }}</span>
+            <span class="badge">{{ post.category }}</span>
+            <span style="font-size: 12px; color: var(--muted-text); margin-left: auto;">Posted {{ post.created_at.strftime('%b %d, %Y') if post.created_at else 'Recently' }}</span>
+        </div>
+        <div class="notice-desc-text">"{{ post.description }}"</div>
+        <div style="display: flex; gap: 14px; font-size: 13px; color: var(--muted-text);">
+            <span>📍 {{ post.location or 'Community Wide' }}</span>
+            {% if post.urgency %}<span>⚡ Urgency: <strong class="text-gold">{{ post.urgency }}</strong></span>{% endif %}
+            {% if post.time_slot %}<span>⏰ Time: {{ post.time_slot }}</span>{% endif %}
+        </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; color: var(--obsidian-black); margin: 0;">AI Match Results</h2>
+            <p style="color: var(--muted-text); font-size: 13.5px; margin: 4px 0 0 0;">Found {{ matches|length if matches else 0 }} matched community members</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" class="form-control" style="max-width: 220px; font-size: 13px; padding: 8px 12px;" placeholder="Search matches..." data-live-filter=".match-item-card">
+            <a href="{{ url_for('my_posts') }}" class="btn btn-outline" style="padding: 8px 14px; font-size: 12px;">← My Notices</a>
+        </div>
+    </div>
+
+    <!-- Match Results Loop -->
+    {% if matches %}
+        {% for match in matches %}
+        <div class="match-item-card card-tilt">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-gold), #3d351e); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Playfair Display', serif;">
+                        {{ match.user.name[:1] if match.user else 'U' }}
+                    </div>
+                    <div>
+                        <div class="match-user-name">{{ match.user.name if match.user else 'Community Member' }}</div>
+                        <div style="font-size: 12px; color: var(--muted-text);">
+                            📍 {{ match.user.location or 'Resident' }} • ⭐ {{ "%.1f"|format(match.user.rating or 5.0) }} • 📊 {{ match.user.trust_score or 90 }}% Trust Score
+                        </div>
+                    </div>
+                </div>
+
+                <div class="match-progress-container">
+                    <div class="match-progress-fill" style="width: {{ match.score if match.score else 85 }}%;">
+                        {{ match.score if match.score else 85 }}% SYNERGY
+                    </div>
+                </div>
+
+                {% if match.rate_per_hour %}
+                <div style="display: flex; gap: 14px; margin: 12px 0 8px 0; background: #FAF6EE; border: 1px solid rgba(197, 160, 89, 0.35); padding: 9px 14px; border-radius: 6px; flex-wrap: wrap; align-items: center;">
+                    <div style="font-size: 13px; font-weight: 700; color: #997328;">
+                        💰 Rate: ₹{{ "%.0f"|format(match.rate_per_hour) }} / hr
+                    </div>
+                    {% if match.rate_per_visit %}
+                    <div style="font-size: 13px; font-weight: 700; color: #0A0C10;">
+                        &bull; Visit: ₹{{ "%.0f"|format(match.rate_per_visit) }}
+                    </div>
+                    {% endif %}
+                    {% if match.availability %}
+                    <div style="font-size: 12px; color: #10B981; font-weight: 600; margin-left: auto;">
+                        ● {{ match.availability }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if match.reasons %}
+                <div class="match-reasons-list">
+                    <ul>
+                        {% for reason in match.reasons %}
+                        <li>✓ {{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
+                <a href="{{ url_for('communication') }}?user_id={{ match.user.id if match.user else '' }}" class="btn btn-gold" style="font-size: 11px; padding: 10px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Direct Message
+                </a>
+                {% if match.contact or (match.user and match.user.contact) %}
+                <a href="tel:{{ match.contact or match.user.contact }}" class="btn btn-sm btn-success" style="font-size: 11px; padding: 8px; text-align: center; text-decoration: none;">
+                    📞 Call {{ match.contact or match.user.contact }}
+                </a>
+                {% endif %}
+                <a href="{{ url_for('view_profile_route', user_id=match.user.id) if match.user else '#' }}" class="btn btn-outline" style="font-size: 11px; padding: 8px; text-align: center;">
+                    View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 60px 30px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #F4F5EF; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: var(--accent-gold);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: var(--obsidian-black); margin-bottom: 8px;">No Direct Matches Discovered Yet</h3>
+            <p style="color: var(--muted-text); max-width: 440px; margin: 0 auto 20px auto; font-size: 13.5px;">
+                Our AI continuously indexes new resident offers. As soon as a neighbor publishes a compatible skill or resource, they will appear here.
+            </p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-gold" style="font-size: 12px;">Return to Dashboard</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

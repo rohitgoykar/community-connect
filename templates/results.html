@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Matching Results Premium Styles */
+    .results-container {
+        max-width: 950px;
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+
+    .results-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 34px;
+        font-weight: 700;
+        color: #0A0C10;
+        margin-bottom: 35px;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.08);
+        padding-bottom: 15px;
+    }
+
+    /* Grid Layout */
+    .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    /* Minimalist Match Card */
+    .match-card {
+        background-color: #FFFFFF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 0;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .match-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #5E5332; /* Signature Muted Gold */
+    }
+
+    .match-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 30px rgba(10, 12, 16, 0.04);
+        border-color: #C5A059;
+    }
+
+    .match-card h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #0A0C10;
+        margin-bottom: 16px;
+    }
+
+    /* Parameter Rows */
+    .card-info {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.04);
+        font-size: 13px;
+    }
+
+    .info-label {
+        font-weight: 700;
+        color: #5E5332;
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 1px;
+    }
+
+    .info-value {
+        color: #0A0C10;
+        font-weight: 500;
+    }
+
+    /* Styled Compatibility Badges */
+    .match-score-badge {
+        display: inline-block;
+        background: rgba(197, 160, 89, 0.15);
+        color: #5E5332;
+        border: 1px solid rgba(197, 160, 89, 0.2);
+        padding: 6px 14px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 20px 0 24px 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Actions Panel */
+    .match-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+    }
+
+    /* Action Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        flex: 1;
+        text-align: center;
+    }
+
+    .btn-gold {
+        background-color: #5E5332;
+        color: #FFFFFF;
+        border: 1px solid #5E5332;
+    }
+
+    .btn-gold:hover {
+        background-color: #0A0C10;
+        border-color: #0A0C10;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #0A0C10;
+        border: 1.5px solid #0A0C10;
+    }
+
+    .btn-outline:hover {
+        background-color: #0A0C10;
+        color: #FFFFFF;
+    }
+
+    /* Footer Navigation Link */
+    .btn-back-row {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    /* Empty State Wrapper */
+    .empty-state {
+        background-color: #FFFFFF;
+        border: 1px dashed #C5A059;
+        padding: 60px 40px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .empty-state h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        color: #0A0C10;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        color: #606875;
+        font-size: 14px;
+    }
+</style>
+
+<div class="results-container fade-in">
+    <h2 class="results-title">Matching Results</h2>
+    
+    {% if results %}
+        <div class="matches-grid">
+            {% for result in results %}
+                <div class="match-card">
+                    <div>
+                        <h3>{{ result.name }}</h3>
+                        
+                        <div class="card-info">
+                            <span class="info-label">District Location</span>
+                            <span class="info-value">{{ result.location or 'Not specified' }}</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="info-label">Skills Stated</span>
+                            <span class="info-value">{{ result.skills or 'Not specified' }}</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="info-label">Portal Rating</span>
+                            <span class="info-value">{{ result.rating or 0 }} ★</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="info-label">Trust Index</span>
+                            <span class="info-value" style="font-weight:600;">{{ result.trust_score }} / 100</span>
+                        </div>
+                        
+                        <div class="match-score-badge">
+                            Suitability Score: {{ "%.0f"|format(result.match_score) }}%
+                        </div>
+                    </div>
+                    
+                    <div class="match-actions">
+                        <a href="{{ url_for('chat', user_id=result.id) }}" class="btn btn-gold">
+                            <svg style="width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            Direct Message
+                        </a>
+                        <button onclick="rateUser({{ result.id }})" class="btn btn-outline">
+                            Assign Rating
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Styled Empty Fallback view -->
+        <div class="empty-state">
+            <h3>No Active Matches Found</h3>
+            <p style="margin-top: 8px;">Try modifying parameters or publishing a separate notice to intersect catalog metrics.</p>
+        </div>
+    {% endif %}
+    
+    <!-- Footer Dashboard Return Button -->
+    <div class="btn-back-row">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline" style="flex:none; width:auto; padding:14px 28px;">
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Integrated dynamic ratings popups script -->
+<script>
+function rateUser(userId) {
+    let score = prompt('Rate this user (1-5 stars):', '5');
+    if (score && score >= 1 && score <= 5) {
+        fetch(`/rate_user/${userId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({score: parseInt(score), feedback: ''})
+        }).then(() => alert('Thank you for rating!'));
+    }
+}
+</script>
+{% endblock %}

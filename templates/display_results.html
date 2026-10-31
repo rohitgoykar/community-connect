@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}Search & Discovery Matches - Smart Community{% endblock %}
+
+{% block content %}
+<style>
+    .display-results-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .results-hero-strip {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 245, 239, 0.95));
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 28px 32px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .results-hero-strip::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
+    }
+
+    .results-grid-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .result-lux-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        transition: var(--transition-smooth);
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    .result-lux-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(10, 12, 16, 0.08);
+        border-color: rgba(197, 160, 89, 0.45);
+    }
+
+    .card-top-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .member-avatar-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-gold), #423b24);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 18px;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(94, 83, 50, 0.2);
+        flex-shrink: 0;
+    }
+
+    .member-heading h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--obsidian-black);
+        line-height: 1.2;
+    }
+
+    .rating-stars {
+        color: #e6a117;
+        font-size: 12px;
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .score-meter-wrap {
+        margin: 14px 0 18px 0;
+        background: #F4F5EF;
+        border-radius: 10px;
+        height: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(10, 12, 16, 0.06);
+        position: relative;
+    }
+
+    .score-meter-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #5E5332, #C5A059);
+        border-radius: 10px;
+        transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .meta-details-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 16px 0;
+        font-size: 13px;
+    }
+
+    .meta-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed rgba(10, 12, 16, 0.06);
+    }
+
+    .meta-label-tag {
+        color: var(--muted-text);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .meta-value-text {
+        color: var(--obsidian-black);
+        font-weight: 600;
+    }
+
+    .reasons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 14px 0;
+    }
+
+    .reason-pill {
+        background: rgba(197, 160, 89, 0.12);
+        color: var(--accent-gold);
+        border: 1px solid rgba(197, 160, 89, 0.25);
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .card-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(10, 12, 16, 0.06);
+    }
+
+    /* Modal */
+    .post-picker-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(10, 12, 16, 0.6);
+        backdrop-filter: blur(6px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .post-picker-box {
+        background: #FFFFFF;
+        max-width: 480px;
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+</style>
+
+<div class="display-results-container">
+    <div class="results-hero-strip">
+        <div>
+            <span class="badge badge-gold" style="margin-bottom: 8px; display: inline-block;">AI MATCH ENGINE</span>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--obsidian-black); margin-bottom: 4px;">Community Matches Found</h1>
+            <p style="color: var(--muted-text); font-size: 13.5px; margin: 0;">Found <strong class="text-gold">{{ results|length }}</strong> matching resident profiles matching your criteria.</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" class="form-control" style="max-width: 240px; padding: 10px 14px; font-size: 13px;" placeholder="Filter results..." data-live-filter=".result-lux-card">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline" style="padding: 10px 16px; font-size: 12px;">← Dashboard</a>
+        </div>
+    </div>
+
+    {% if results %}
+    <div class="results-grid-layout">
+        {% for result in results %}
+        <div class="result-lux-card card-tilt">
+            <div>
+                <div class="card-top-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="member-avatar-box">
+                            {{ result.name[:1] }}
+                        </div>
+                        <div class="member-heading">
+                            <h3>{{ result.name }}</h3>
+                            <div class="rating-stars">
+                                {% for i in range(5) %}
+                                    {% if i < result.rating|int %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span style="color: var(--muted-text); font-size: 11px; margin-left: 2px;">({{ result.rating }})</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge badge-gold" style="font-size: 11px; padding: 4px 8px;">{{ result.match_score }}% MATCH</span>
+                </div>
+
+                <div class="score-meter-wrap" title="Compatibility Score: {{ result.match_score }}%">
+                    <div class="score-meter-fill" style="width: {{ result.match_score }}%;"></div>
+                </div>
+
+                <div class="meta-details-list">
+                    <div class="meta-detail-row">
+                        <span class="meta-label-tag">📍 Location</span>
+                        <span class="meta-value-text">{{ result.location or 'Verified Resident' }}</span>
+                    </div>
+                    <div class="meta-detail-row">
+                        <span class="meta-label-tag">📊 Trust Score</span>
+                        <span class="meta-value-text" style="color: #2e7d32;">{{ result.trust_score }}% Verified</span>
+                    </div>
+                    {% if result.contact %}
+                    <div class="meta-detail-row">
+                        <span class="meta-label-tag">📞 Contact</span>
+                        <span class="meta-value-text">{{ result.contact }}</span>
+                    </div>
+                    {% endif %}
+                    {% if result.skills %}
+                    <div class="meta-detail-row">
+                        <span class="meta-label-tag">🛠️ Skills</span>
+                        <span class="meta-value-text" style="max-width: 180px; text-align: right; font-size: 12px;">{{ result.skills }}</span>
+                    </div>
+                    {% endif %}
+                    {% if result.blood_group %}
+                    <div class="meta-detail-row">
+                        <span class="meta-label-tag">🩸 Blood Group</span>
+                        <span class="badge badge-gold" style="font-size: 10px;">{{ result.blood_group }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if result.match_reasons %}
+                <div class="reasons-container">
+                    {% for reason in result.match_reasons %}
+                        <span class="reason-pill">✓ {{ reason }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card-actions-grid">
+                <a href="{{ url_for('communication') }}?user_id={{ result.id }}" class="btn btn-outline" style="font-size: 11px; padding: 10px 12px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Chat
+                </a>
+                <button onclick="sendRequest({{ result.id }})" class="btn btn-gold" style="font-size: 11px; padding: 10px 12px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    Request
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 30px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 6px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #F4F5EF; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; color: var(--accent-gold);">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; color: var(--obsidian-black); margin-bottom: 8px;">No Direct Matches Found</h3>
+        <p style="color: var(--muted-text); max-width: 460px; margin: 0 auto 24px auto; font-size: 14px; line-height: 1.6;">
+            We couldn't locate matching resident offers for this specific query yet. Try publishing a notice to notify the whole community or update your profile skills.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <a href="{{ url_for('create_post') }}" class="btn btn-gold" style="font-size: 12px;">Create Community Notice</a>
+            <a href="{{ url_for('profile_setup') }}" class="btn btn-outline" style="font-size: 12px;">Update My Profile</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modern Post Picker Modal -->
+<div id="postPickerOverlay" class="post-picker-modal-overlay">
+    <div class="post-picker-box">
+        <div style="padding: 24px 28px; border-bottom: 1px solid var(--border-color); background: #F8F9F5;">
+            <h4 style="font-family: 'Playfair Display', serif; font-size: 18px; color: var(--obsidian-black); margin: 0;">Link Community Notice</h4>
+            <p style="font-size: 12px; color: var(--muted-text); margin: 4px 0 0 0;">Select which of your active requests this connection is for</p>
+        </div>
+        <div style="padding: 24px 28px;">
+            <select id="postPickerSelect" class="form-control" style="width: 100%; margin-bottom: 16px; font-size: 13px;">
+            </select>
+            <div id="postPickerEmpty" style="display: none; padding: 14px; background: #F4F5EF; border-radius: 4px; font-size: 13px; color: var(--muted-text); margin-bottom: 16px;">
+                You don't have any published notices yet. Please create one first so neighbors know what you require.
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closePostPicker()" class="btn btn-outline" style="padding: 10px 18px; font-size: 12px;">Cancel</button>
+                <button onclick="confirmSendRequest()" class="btn btn-gold" id="postPickerConfirmBtn" style="padding: 10px 20px; font-size: 12px;">Send Connection</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let pendingProviderId = null;
+
+    function sendRequest(userId) {
+        pendingProviderId = userId;
+        fetch('/api/get-my-posts')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('postPickerSelect');
+                const empty = document.getElementById('postPickerEmpty');
+                const confirmBtn = document.getElementById('postPickerConfirmBtn');
+                select.innerHTML = '';
+
+                if (data.posts && data.posts.length > 0) {
+                    select.style.display = 'block';
+                    empty.style.display = 'none';
+                    confirmBtn.style.display = 'inline-block';
+                    data.posts.forEach(post => {
+                        const opt = document.createElement('option');
+                        opt.value = post.id;
+                        opt.textContent = `#${post.id} - ${post.description.substring(0, 65)}...`;
+                        select.appendChild(opt);
+                    });
+                } else {
+                    select.style.display = 'none';
+                    empty.style.display = 'block';
+                    confirmBtn.style.display = 'none';
+                }
+
+                document.getElementById('postPickerOverlay').style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                if (window.showModernToast) {
+                    showModernToast('Could not load your active posts. Please try again.', 'error');
+                } else {
+                    alert('Could not load your active posts.');
+                }
+            });
+    }
+
+    function closePostPicker() {
+        document.getElementById('postPickerOverlay').style.display = 'none';
+        pendingProviderId = null;
+    }
+
+    function confirmSendRequest() {
+        const postId = document.getElementById('postPickerSelect').value;
+        if (!postId || !pendingProviderId) return;
+
+        fetch('/send-request', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                provider_id: pendingProviderId,
+                post_id: parseInt(postId),
+                message: "I'd like to connect regarding your offer on Smart Community."
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            closePostPicker();
+            if (data.success) {
+                if (window.showModernToast) {
+                    showModernToast('✓ Connection request dispatched successfully!', 'success');
+                } else {
+                    alert('✓ Connection request sent successfully!');
+                }
+            } else {
+                if (window.showModernToast) {
+                    showModernToast(data.error || 'Could not send request', 'error');
+                } else {
+                    alert('Error: ' + (data.error || 'Could not send request'));
+                }
+            }
+        })
+        .catch(error => {
+            closePostPicker();
+            if (window.showModernToast) {
+                showModernToast('Error dispatching request', 'error');
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,311 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ provider.name }} – {{ service.trade_category|title }}{% endblock %}
+{% block content %}
+<style>
+    .profile-wrapper { max-width: 860px; margin: 0 auto; padding-bottom: 60px; }
+
+    /* Hero card (Light Mode) */
+    .prov-hero {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F7FA 100%);
+        border: 2px solid rgba(197, 160, 89, 0.4);
+        border-radius: 14px;
+        padding: 36px 36px 28px;
+        color: #0A0C10;
+        display: flex;
+        gap: 28px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .prov-hero::before {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 36px; right: 36px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #C5A059, transparent);
+    }
+    .hero-avatar {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #5E5332, #C5A059);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 34px; font-weight: 700; color: #fff;
+        border: 3px solid rgba(197,160,89,0.5);
+        flex-shrink: 0;
+    }
+    .hero-info h2 { font-family:'Playfair Display',serif; font-size:26px; color:#0A0C10; margin-bottom:6px; }
+    .hero-meta { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+    .hero-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(10,12,16,0.05);
+        border: 1px solid rgba(10,12,16,0.1);
+        border-radius: 20px; padding: 4px 12px;
+        font-size: 12px; color: #4A5568;
+    }
+    .hero-badge.gold { border-color: rgba(197,160,89,0.5); color: #8A6D3B; background: rgba(197,160,89,0.15); font-weight: 600; }
+
+    /* Section cards */
+    .section-card {
+        background: rgba(255,255,255,0.93);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+    .section-title {
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(10,12,16,0.06);
+        font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 1.5px;
+        color: #5E5332;
+        background: rgba(248,249,245,0.7);
+    }
+    .section-body { padding: 22px 24px; }
+
+    /* Rate grid */
+    .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .rate-box {
+        background: #F4F5EF;
+        border: 1px solid rgba(10,12,16,0.08);
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+    }
+    .rate-box .amount {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px; font-weight: 700; color: #0A0C10;
+    }
+    .rate-box .label { font-size: 12px; color: #606875; margin-top: 4px; }
+
+    /* Info rows */
+    .info-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 11px 0;
+        border-bottom: 1px dashed rgba(10,12,16,0.07);
+        font-size: 13.5px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .lbl { color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .info-row .val { color: #0A0C10; font-weight: 600; }
+
+    /* Trust bar */
+    .trust-bar-wrap { margin: 8px 0 4px; }
+    .trust-bar-track { background:#E5E7E0; border-radius:8px; height:8px; overflow:hidden; }
+    .trust-bar-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,#5E5332,#C5A059); }
+
+    /* Reviews */
+    .review-item {
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(10,12,16,0.06);
+    }
+    .review-item:last-child { border-bottom: none; }
+    .review-stars { display:flex; gap:3px; margin-bottom:5px; }
+    .review-star { color:#e6a117; font-size:13px; }
+    .review-comment { font-size:13.5px; color:#444; line-height:1.55; }
+    .review-meta { font-size:11px; color:#999; margin-top:4px; }
+
+    /* Sticky contact bar */
+    .contact-bar {
+        background: rgba(10,12,16,0.96);
+        backdrop-filter: blur(20px);
+        border-radius: 12px;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    }
+    .contact-bar p { color: rgba(255,255,255,0.65); font-size: 13px; margin: 0; }
+    .contact-bar strong { color: #C5A059; }
+</style>
+
+<div class="profile-wrapper">
+
+    <!-- Hero -->
+    <div class="prov-hero">
+        <div class="hero-avatar">{{ (provider.name or provider.username)[:1]|upper }}</div>
+        <div class="hero-info" style="flex:1;">
+            <h2>{{ provider.name or provider.username }}</h2>
+            <div style="color:rgba(255,255,255,0.6); font-size:13.5px; margin-bottom:8px;">
+                {% if category %}{{ category.icon }} {{ category.label }}{% endif %}
+                {% if service.trade_subcategory %} — {{ service.trade_subcategory }}{% endif %}
+            </div>
+            <div class="hero-meta">
+                {% if service.is_available %}
+                <span class="hero-badge gold">● Available Now</span>
+                {% else %}
+                <span class="hero-badge">◌ Not Available</span>
+                {% endif %}
+                {% if service.is_verified %}
+                <span class="hero-badge gold">✓ Verified Pro</span>
+                {% endif %}
+                {% if service.experience_years > 0 %}
+                <span class="hero-badge">{{ service.experience_years }} yrs exp</span>
+                {% endif %}
+                <span class="hero-badge">⭐ {{ "%.1f"|format(provider.rating or 0) }} ({{ provider.total_ratings or 0 }} reviews)</span>
+            </div>
+        </div>
+        <!-- Back button -->
+        {% if category %}
+        <a href="{{ url_for('services_browse', category_key=service.trade_category) }}"
+           style="color:rgba(255,255,255,0.5); font-size:12px; text-decoration:none; align-self:flex-start; margin-left:auto;">
+            ← Back to {{ category.label }}s
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Contact / Book Now Bar -->
+    {% if user and user.id != provider.id %}
+    <div class="contact-bar">
+        <div>
+            <p>Ready to book <strong>{{ provider.name or provider.username }}</strong>?</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{{ url_for('communication') }}?user_id={{ provider.id }}"
+               class="btn btn-gold" style="padding:11px 24px; font-size:12px;">
+                Send Message / Book Now
+            </a>
+            {% if provider.contact %}
+            <a href="tel:{{ provider.contact }}" class="btn btn-outline"
+               style="padding:11px 20px; font-size:12px; color:#fff; border-color:rgba(255,255,255,0.3);">
+                Call: {{ provider.contact }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% elif not user %}
+    <div class="contact-bar">
+        <p>Login or create an account to contact <strong>{{ provider.name }}</strong> directly.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-gold" style="padding:11px 22px; font-size:12px;">Login to Contact</a>
+    </div>
+    {% endif %}
+
+    <div style="display:grid; grid-template-columns: 1fr 320px; gap:20px; flex-wrap:wrap;">
+        <div>
+            <!-- Bio -->
+            {% if service.bio %}
+            <div class="section-card">
+                <div class="section-title">About</div>
+                <div class="section-body" style="font-size:14px; color:#333; line-height:1.65;">
+                    {{ service.bio }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reviews -->
+            <div class="section-card">
+                <div class="section-title">Customer Reviews ({{ feedbacks|length }})</div>
+                <div class="section-body">
+                    {% if feedbacks %}
+                        {% for fb in feedbacks %}
+                        <div class="review-item">
+                            <div class="review-stars">
+                                {% for i in range(5) %}
+                                <span class="review-star" style="{% if i >= fb.rating %}color:#ddd;{% endif %}">★</span>
+                                {% endfor %}
+                            </div>
+                            {% if fb.comment %}
+                            <div class="review-comment">"{{ fb.comment }}"</div>
+                            {% endif %}
+                            <div class="review-meta">
+                                — {{ fb.from_user.name or fb.from_user.username }} &bull;
+                                {{ fb.created_at.strftime('%b %d, %Y') }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div style="text-align:center; padding:24px; color:#999; font-size:13.5px;">
+                        No reviews yet. Be the first to work with this professional!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Rates -->
+            <div class="section-card" style="margin-bottom:18px;">
+                <div class="section-title">Service Rates</div>
+                <div class="section-body">
+                    <div class="rate-grid">
+                        <div class="rate-box">
+                            <div class="amount">₹{{ service.rate_per_hour|int if service.rate_per_hour > 0 else '—' }}</div>
+                            <div class="label">Per Hour</div>
+                        </div>
+                        <div class="rate-box">
+                            <div class="amount">₹{{ service.rate_per_visit|int if service.rate_per_visit > 0 else '—' }}</div>
+                            <div class="label">Per Visit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="section-card">
+                <div class="section-title">Provider Details</div>
+                <div class="section-body">
+                    {% if service.service_area %}
+                    <div class="info-row">
+                        <span class="lbl">Service Area</span>
+                        <span class="val">{{ service.service_area }}</span>
+                    </div>
+                    {% endif %}
+                    {% if service.availability %}
+                    <div class="info-row">
+                        <span class="lbl">Availability</span>
+                        <span class="val">{{ service.availability }}</span>
+                    </div>
+                    {% endif %}
+                    {% if service.certifications %}
+                    <div class="info-row">
+                        <span class="lbl">Certifications</span>
+                        <span class="val">{{ service.certifications }}</span>
+                    </div>
+                    {% endif %}
+                    {% if provider.location %}
+                    <div class="info-row">
+                        <span class="lbl">Location</span>
+                        <span class="val">{{ provider.location }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Trust Score -->
+                    <div style="margin-top:14px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; color:#888; margin-bottom:6px;">
+                            <span>Community Trust Score</span>
+                            <strong style="color:#2e7d32;">{{ provider.trust_score }}%</strong>
+                        </div>
+                        <div class="trust-bar-track">
+                            <div class="trust-bar-fill" style="width:{{ provider.trust_score }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Member Since -->
+                    <div class="info-row" style="margin-top:10px;">
+                        <span class="lbl">Member Since</span>
+                        <span class="val">{{ provider.created_at.strftime('%b %Y') if provider.created_at else 'Recently' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 720px) {
+        .prov-hero { flex-direction: column; }
+        [style*="grid-template-columns: 1fr 320px"] { grid-template-columns: 1fr !important; }
+        .rate-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}

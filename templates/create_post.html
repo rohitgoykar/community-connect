@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% block title %}Create District Post - Smart Community{% endblock %}
+{% block content %}
+<style>
+    .post-create-wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+
+    .draft-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(197, 160, 89, 0.15);
+        border: 1px solid rgba(197, 160, 89, 0.4);
+        color: #C5A059;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .create-card {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        border-radius: 12px;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.14);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .create-card-header {
+        background: linear-gradient(135deg, #0A0C10 0%, #151D2C 100%);
+        padding: 32px 36px;
+        color: #FFFFFF;
+        position: relative;
+    }
+
+    .create-card-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5E5332, #C5A059, #5E5332);
+    }
+
+    .create-card-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        color: #FFFFFF;
+        margin: 0 0 6px 0;
+    }
+
+    .create-card-header p {
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 13.5px;
+        margin: 0;
+    }
+
+    .create-card-body {
+        padding: 36px 36px 32px 36px;
+    }
+
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
+
+    .form-group-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-bottom: 22px;
+    }
+
+    .field-label {
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #0A0C10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .field-label small {
+        font-size: 11px;
+        color: #C5A059;
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 600;
+    }
+
+    .input-luxury, .select-luxury, .textarea-luxury {
+        width: 100%;
+        padding: 13px 16px;
+        border: 1.5px solid rgba(10, 12, 16, 0.14);
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        background: #F8F9F5;
+        color: #0A0C10;
+        outline: none;
+        transition: all 0.25s ease;
+    }
+
+    .input-luxury:focus, .select-luxury:focus, .textarea-luxury:focus {
+        border-color: #C5A059;
+        background: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.16);
+    }
+
+    .textarea-luxury {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+
+    /* Live Draft Status Box */
+    .draft-summary-box {
+        background: rgba(10, 12, 16, 0.04);
+        border: 1px dashed rgba(197, 160, 89, 0.55);
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 26px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .draft-meta-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .meta-chip {
+        font-size: 11.5px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .meta-chip.gold { background: rgba(197, 160, 89, 0.18); color: #5E5332; border: 1px solid rgba(197, 160, 89, 0.35); }
+    .meta-chip.dark { background: #0A0C10; color: #FFFFFF; }
+    .meta-chip.emerald { background: rgba(16, 185, 129, 0.15); color: #065F46; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .meta-chip.blue { background: rgba(30, 96, 173, 0.15); color: #1E60AD; border: 1px solid rgba(30, 96, 173, 0.3); }
+
+    /* Quick Starter Templates */
+    .starter-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .starter-chip {
+        background: #F0F2EA;
+        border: 1px solid rgba(10, 12, 16, 0.1);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0A0C10;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .starter-chip:hover {
+        background: #0A0C10;
+        color: #FFFFFF;
+        border-color: #0A0C10;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit-post {
+        background: #0A0C10;
+        color: #FFFFFF;
+        border: 1px solid #0A0C10;
+        padding: 16px 28px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-submit-post:hover {
+        background: #C5A059;
+        border-color: #C5A059;
+        color: #0A0C10;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(197, 160, 89, 0.35);
+    }
+
+    .btn-reset-draft {
+        background: transparent;
+        color: #606875;
+        border: 1px solid rgba(10, 12, 16, 0.2);
+        padding: 16px 22px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .btn-reset-draft:hover {
+        background: rgba(10, 12, 16, 0.05);
+        color: #0A0C10;
+    }
+
+    @media (max-width: 680px) {
+        .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
+        .create-card-body { padding: 24px 20px; }
+        .create-card-header { padding: 24px 20px; }
+    }
+</style>
+
+<div class="post-create-wrap">
+    
+    <div class="create-card">
+        <!-- Header -->
+        <div class="create-card-header">
+            <div class="draft-badge-pill">
+                <span>✦</span> Active Notice Draft
+            </div>
+            <h1>Create Community Post</h1>
+            <p>Publish localized requests, service assistance, or offerings across the Sangamner neighborhood network.</p>
+        </div>
+
+        <div class="create-card-body">
+            
+            <!-- Quick Template Chips -->
+            <div style="margin-bottom: 22px;">
+                <label class="field-label" style="margin-bottom: 8px;">
+                    <span>Quick Starter Drafts</span>
+                    <small>Click to auto-fill common requests</small>
+                </label>
+                <div class="starter-chips">
+                    <span class="starter-chip" onclick="applyTemplate('Plumbing Assistance', 'Looking for an experienced plumber for emergency water pipe leakage repair in Sangamner.', 'Local Services', 'Normal', 'plumber')">🔧 Plumber Help</span>
+                    <span class="starter-chip" onclick="applyTemplate('Electrician Needed', 'Need a certified electrician for switchboard wiring and inverter installation in Sangamner.', 'Local Services', 'Normal', 'electrician')">⚡ Electrician Needed</span>
+                    <span class="starter-chip" onclick="applyTemplate('Home Deep Cleaning', 'Seeking reliable home cleaning service provider for 2-BHK apartment in Sangamner.', 'Local Services', 'Normal', 'cleaner')">🧹 Home Cleaner</span>
+                    <span class="starter-chip" onclick="applyTemplate('AC Servicing & Gas Refill', 'Need technician for split AC cooling check and filter cleaning in Sangamner.', 'Local Services', 'Normal', 'ac_technician')">❄️ AC Technician</span>
+                    <span class="starter-chip" onclick="applyTemplate('Emergency O+ Blood Donor Needed', 'Urgent requirement for O+ blood donor at Sangamner civil hospital.', 'Medical & Healthcare', 'Urgent', null)">🩸 Urgent Blood Request</span>
+                </div>
+            </div>
+
+            <!-- Pre-filled Draft Summary Bar -->
+            <div class="draft-summary-box">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📝</span>
+                    <strong style="font-size: 13px; color: #0A0C10;">Draft Configuration:</strong>
+                </div>
+                <div class="draft-meta-chips">
+                    <span class="meta-chip gold" id="chipType">Type: Request Help</span>
+                    <span class="meta-chip blue" id="chipCat">Category: Local Services</span>
+                    <span class="meta-chip emerald" id="chipLoc">📍 Sangamner</span>
+                    <span class="meta-chip dark" id="chipUrg">Urgency: Normal</span>
+                </div>
+            </div>
+
+            <!-- The Main Form -->
+            <form method="POST" action="/create-post" id="postCreateForm">
+                
+                <!-- Row 1: Type & Category -->
+                <div class="form-grid-2">
+                    <div class="form-group-field" style="margin-bottom: 0;">
+                        <label class="field-label" for="post_type">
+                            <span>Type</span>
+                            <small>Pre-selected draft: Request Help</small>
+                        </label>
+                        <select name="post_type" id="post_type" class="select-luxury" onchange="updateSummary()" required>
+                            <option value="Request Help" selected>Request Help (Need Assistance)</option>
+                            <option value="Offer Service">Offer Service (Providing Skills)</option>
+                            <option value="Community Notice">Community Notice (Announcement)</option>
+                            <option value="Emergency Alert">Emergency Alert (Urgent Attention)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 0;">
+                        <label class="field-label" for="category">
+                            <span>Category</span>
+                            <small>Pre-selected draft: Local Services</small>
+                        </label>
+                        <select name="category" id="category" class="select-luxury" onchange="toggleCategorySpecifics(); updateSummary();" required>
+                            <option value="Local Services" selected>Local Services (Plumber, Electrician, Cleaner, AC)</option>
+                            <option value="Medical & Healthcare">Medical & Healthcare (Blood, Doctor, Hospital)</option>
+                            <option value="Maintenance & Repair">Maintenance & Home Repair</option>
+                            <option value="Real Estate">Real Estate & Rentals</option>
+                            <option value="Education & Coaching">Education & Tutoring</option>
+                            <option value="Transportation">Transportation & Errands</option>
+                            <option value="General Support">General Community Support</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sub-Trade Selection (shown for Local Services / Maintenance) -->
+                <div class="form-group-field" id="serviceSubcategoryGroup" style="margin-top: 18px; margin-bottom: 22px;">
+                    <label class="field-label" for="service_subcategory">
+                        <span>Specific Service / Trade Required</span>
+                        <small>Select trade to directly match verified local providers and view rates</small>
+                    </label>
+                    <select name="service_subcategory" id="service_subcategory" class="select-luxury" onchange="updateSummary()">
+                        <option value="plumber" {% if not draft or draft.service_subcategory == 'plumber' %}selected{% endif %}>🔧 Plumbing / Plumber (Pipe leaks, tap repair, bathroom & sanitary fixtures)</option>
+                        <option value="electrician" {% if draft and draft.service_subcategory == 'electrician' %}selected{% endif %}>⚡ Electrician (Wiring, switchboards, MCB, inverter, lighting)</option>
+                        <option value="cleaner" {% if draft and draft.service_subcategory == 'cleaner' %}selected{% endif %}>🧹 Cleaner / Housekeeping (Deep home cleaning, sanitation, maid service)</option>
+                        <option value="ac_technician" {% if draft and draft.service_subcategory == 'ac_technician' %}selected{% endif %}>❄️ AC Technician (Servicing, gas refill, cooling repair, installation)</option>
+                        <option value="carpenter" {% if draft and draft.service_subcategory == 'carpenter' %}selected{% endif %}>🪚 Carpenter (Furniture, doors, locks, woodwork repair)</option>
+                        <option value="painter" {% if draft and draft.service_subcategory == 'painter' %}selected{% endif %}>🎨 Painter (Wall painting, waterproofing, polishing)</option>
+                        <option value="mason" {% if draft and draft.service_subcategory == 'mason' %}selected{% endif %}>🧱 Mason / Labour (Tiles, cement work, masonry, plaster)</option>
+                        <option value="cook" {% if draft and draft.service_subcategory == 'cook' %}selected{% endif %}>👨‍🍳 Cook / Catering (Daily meals, home cook)</option>
+                        <option value="driver" {% if draft and draft.service_subcategory == 'driver' %}selected{% endif %}>🚗 Driver (Personal driver, cab, chauffeur)</option>
+                        <option value="gardener" {% if draft and draft.service_subcategory == 'gardener' %}selected{% endif %}>🌿 Gardener (Lawn care, plant pruning)</option>
+                        <option value="other" {% if draft and draft.service_subcategory == 'other' %}selected{% endif %}>🛠️ Other Local Skilled Service</option>
+                    </select>
+                </div>
+
+                <!-- Row 2: Title -->
+                <div class="form-group-field">
+                    <label class="field-label" for="title">
+                        <span>Title</span>
+                        <small>Brief headline for your notice</small>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        class="input-luxury" 
+                        value="{{ draft.title if draft else '' }}"
+                        placeholder="E.g. Need experienced plumber for bathroom pipe leak"
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <!-- Row 3: Description -->
+                <div class="form-group-field">
+                    <label class="field-label" for="description">
+                        <span>Description</span>
+                        <small>Provide full details of your requirement</small>
+                    </label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        class="textarea-luxury" 
+                        placeholder="E.g. Looking for a skilled plumber to inspect and repair bathroom tap leakage in Sangamner area. Available on Saturday morning." 
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Row 4: Location & Urgency -->
+                <div class="form-grid-2">
+                    <div class="form-group-field" style="margin-bottom: 0;">
+                        <label class="field-label" for="location">
+                            <span>Location</span>
+                            <small>Pre-filled draft: Sangamner</small>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="location" 
+                            name="location" 
+                            class="input-luxury" 
+                            value="Sangamner" 
+                            placeholder="Sangamner"
+                            oninput="updateSummary()" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 0;">
+                        <label class="field-label" for="urgency">
+                            <span>Urgency</span>
+                            <small>Pre-selected draft: Normal</small>
+                        </label>
+                        <select name="urgency" id="urgency" class="select-luxury" onchange="updateSummary()" required>
+                            <option value="Low">Low (Flexible timeframe)</option>
+                            <option value="Normal" selected>Normal (Standard priority)</option>
+                            <option value="High">High (Within 24–48 hours)</option>
+                            <option value="Urgent">Urgent (Immediate attention)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div style="display: flex; gap: 14px; margin-top: 30px; flex-wrap: wrap;">
+                    <button type="submit" class="btn-submit-post" style="flex: 1;">
+                        <span>🚀 Broadcast Notice & Find Matches &rarr;</span>
+                    </button>
+                    <button type="button" class="btn-reset-draft" onclick="resetToDraft()">
+                        ↺ Reset to Default Draft
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCategorySpecifics() {
+        const cat = document.getElementById('category').value;
+        const subGroup = document.getElementById('serviceSubcategoryGroup');
+        if (subGroup) {
+            if (cat === 'Local Services' || cat === 'Maintenance & Repair') {
+                subGroup.style.display = 'block';
+            } else {
+                subGroup.style.display = 'none';
+            }
+        }
+    }
+
+    function updateSummary() {
+        const pType = document.getElementById('post_type').value;
+        const cat = document.getElementById('category').value;
+        const loc = document.getElementById('location').value.trim() || 'Sangamner';
+        const urg = document.getElementById('urgency').value;
+        const subTradeEl = document.getElementById('service_subcategory');
+
+        document.getElementById('chipType').textContent = `Type: ${pType}`;
+        
+        if ((cat === 'Local Services' || cat === 'Maintenance & Repair') && subTradeEl && subTradeEl.value) {
+            const tradeLabel = subTradeEl.options[subTradeEl.selectedIndex].text.split('(')[0].trim();
+            document.getElementById('chipCat').textContent = `Category: ${cat} • ${tradeLabel}`;
+        } else {
+            document.getElementById('chipCat').textContent = `Category: ${cat}`;
+        }
+
+        document.getElementById('chipLoc').textContent = `📍 ${loc}`;
+        document.getElementById('chipUrg').textContent = `Urgency: ${urg}`;
+    }
+
+    function applyTemplate(title, desc, cat = 'Local Services', urg = 'Normal', trade = 'plumber') {
+        document.getElementById('post_type').value = 'Request Help';
+        document.getElementById('category').value = cat;
+        toggleCategorySpecifics();
+        if (document.getElementById('service_subcategory') && trade) {
+            document.getElementById('service_subcategory').value = trade;
+        }
+        document.getElementById('title').value = title;
+        document.getElementById('description').value = desc;
+        document.getElementById('location').value = 'Sangamner';
+        document.getElementById('urgency').value = urg;
+        updateSummary();
+        document.getElementById('description').focus();
+    }
+
+    function resetToDraft() {
+        document.getElementById('post_type').value = 'Request Help';
+        document.getElementById('category').value = 'Local Services';
+        if (document.getElementById('service_subcategory')) {
+            document.getElementById('service_subcategory').value = 'plumber';
+        }
+        toggleCategorySpecifics();
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('location').value = 'Sangamner';
+        document.getElementById('urgency').value = 'Normal';
+        updateSummary();
+        document.getElementById('title').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleCategorySpecifics();
+        updateSummary();
+    });
+</script>
+{% endblock %}

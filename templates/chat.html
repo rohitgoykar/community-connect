@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ other_user.name }} - Smart Community</title>
+    
+    <!-- Premium Google Fonts pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        /* Modern Color Variables with Stark Contrast */
+        :root {
+            --primary-white: #FFFFFF;
+            --bg-cream: #EAECDD;
+            --accent-gold: #5E5332;
+            --accent-gold-light: #C5A059;
+            --obsidian-black: #0A0C10; 
+            --muted-text: #606875;
+            --light-bubble: #F4F5EF;
+            --border-color: rgba(10, 12, 16, 0.08);
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Base Resets */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent !important;
+            color: var(--obsidian-black);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Chat Window Card */
+        .chat-wrapper {
+            width: 100%;
+            max-width: 600px;
+            background: var(--primary-white);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 30px 60px rgba(10, 12, 16, 0.08);
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            position: relative;
+        }
+
+        /* Top Header Area */
+        .chat-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--primary-white);
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background-color: var(--accent-gold);
+            color: var(--primary-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-info h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--obsidian-black);
+            line-height: 1.2;
+        }
+
+        .header-info p {
+            font-size: 12px;
+            color: var(--muted-text);
+            margin-top: 2px;
+        }
+
+        /* Messages Viewport */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background-color: var(--primary-white);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+        }
+
+        /* Direction Alignment */
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        /* Rounded Conversational Bubbles */
+        .message-content {
+            padding: 14px 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .sent .message-content {
+            background-color: var(--accent-gold);
+            color: var(--primary-white);
+            border-radius: 18px 18px 4px 18px; /* Cute asymmetrical borders */
+        }
+
+        .received .message-content {
+            background-color: var(--light-bubble);
+            color: var(--obsidian-black);
+            border: 1px solid var(--border-color);
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: var(--muted-text);
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Bottom Input Form Area */
+        .input-area {
+            display: flex;
+            padding: 24px 30px;
+            background-color: var(--light-bubble);
+            border-top: 1px solid var(--border-color);
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 16px 22px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            background-color: var(--primary-white);
+            border: 1px solid var(--border-color);
+            color: var(--obsidian-black);
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .input-area input::placeholder {
+            color: #9EA4B0;
+        }
+
+        .input-area input:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 4px 12px rgba(94, 83, 50, 0.05);
+        }
+
+        /* Send Button */
+        .btn-send {
+            padding: 16px 28px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background-color: var(--obsidian-black);
+            color: var(--primary-white);
+            border: 1px solid var(--obsidian-black);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-send:hover {
+            background-color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        /* Scrollbar aesthetics */
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .messages::-webkit-scrollbar-thumb {
+            background-color: rgba(10, 12, 16, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-wrapper">
+        
+        <!-- Chat Header Card -->
+        <div class="chat-header">
+            <div class="avatar">
+                <!-- Displays the first character of the recipient's name -->
+                {{ other_user.name[:1] }}
+            </div>
+            <div class="header-info">
+                <h2>{{ other_user.name }}</h2>
+                <p>One-to-One Secure Channel</p>
+            </div>
+        </div>
+
+        <!-- Scrollable Messages Area -->
+        <div class="messages" id="messages">
+            {% for msg in messages %}
+            <div class="message {% if msg.sender_id == session.user_id %}sent{% else %}received{% endif %}">
+                <div class="message-content">{{ msg.message }}</div>
+                <div class="message-time">{{ msg.timestamp.strftime('%H:%M') }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Input Control Panel -->
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Write your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="btn-send" onclick="sendMessage()">Send</button>
+        </div>
+        
+    </div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            fetch('/send-message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    receiver_id: {{ other_user.id }},
+                    message: message
+                })
+            }).then(() => {
+                input.value = '';
+                location.reload();
+            });
+        }
+        
+        // Auto-scroll logic
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+        // Auto-refresh rate (5 seconds)
+        setInterval(() => { 
+            location.reload(); 
+        }, 5000);
+    </script>
+    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
+</body>
+</html>

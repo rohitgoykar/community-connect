@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Text Understanding - NLP{% endblock %}
+
+{% block content %}
+<style>
+    /* NLP Premium Styles */
+    .nlp-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+
+    /* Core Section Card */
+    .nlp-card {
+        background-color: #FFFFFF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 0;
+        padding: 40px;
+        position: relative;
+    }
+
+    .nlp-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #5E5332; /* Signature Muted Gold */
+    }
+
+    .nlp-card h5 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #0A0C10;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Alert Banner */
+    .nlp-alert {
+        padding: 16px 20px;
+        background-color: #F8F9F5;
+        border-left: 4px solid #C5A059;
+        font-size: 14px;
+        color: #0A0C10;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nlp-alert svg {
+        width: 18px;
+        height: 18px;
+        stroke: #5E5332;
+        fill: none;
+        stroke-width: 2.5;
+    }
+
+    /* Grid configuration */
+    .nlp-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 35px;
+    }
+
+    .panel-card {
+        background-color: #FFFFFF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        padding: 30px;
+    }
+
+    .panel-card h6 {
+        font-family: 'Playfair Display', serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0A0C10;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.06);
+        padding-bottom: 10px;
+    }
+
+    /* Input controls */
+    .form-textarea {
+        width: 100%;
+        padding: 16px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        background-color: #F8F9F5;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        color: #0A0C10;
+        outline: none;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    .form-textarea::placeholder {
+        color: #9EA4B0;
+    }
+
+    .form-textarea:focus {
+        background-color: #FFFFFF;
+        border-color: #5E5332;
+    }
+
+    /* Action Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 28px;
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .btn-gold {
+        background-color: #5E5332;
+        color: #FFFFFF;
+        border: 1px solid #5E5332;
+    }
+
+    .btn-gold:hover {
+        background-color: #0A0C10;
+        border-color: #0A0C10;
+    }
+
+    /* Dynamic Badges outputted by JS script */
+    .badge {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 4px 10px;
+        display: inline-block;
+        background-color: #F4F5EF;
+        color: #0A0C10;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+    }
+
+    .badge-high {
+        background-color: rgba(197, 160, 89, 0.15);
+        color: #5E5332;
+        border: 1px solid rgba(197, 160, 89, 0.2);
+    }
+
+    .divider-line {
+        border: 0;
+        height: 1px;
+        background-color: rgba(10, 12, 16, 0.08);
+        margin: 20px 0;
+    }
+
+    /* Lists details styling */
+    .reasons-list {
+        list-style: none;
+        padding-left: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .reasons-list li {
+        font-size: 13.5px;
+        color: #242930;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .reasons-list li::before {
+        content: '✓';
+        color: #C5A059;
+        font-weight: bold;
+    }
+
+    /* Info Block Footer */
+    .how-it-works-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #5E5332;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.06);
+        padding-bottom: 8px;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        list-style: none;
+    }
+
+    .info-item {
+        background-color: #F8F9F5;
+        border: 1px solid rgba(10, 12, 16, 0.04);
+        padding: 16px 20px;
+        font-size: 13.5px;
+        color: #242930;
+    }
+
+    .info-item strong {
+        color: #0A0C10;
+        display: inline-block;
+        width: 180px;
+    }
+
+    @media (max-width: 768px) {
+        .nlp-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .nlp-card {
+            padding: 30px 20px;
+        }
+    }
+</style>
+
+<div class="nlp-container fade-in">
+    <div class="nlp-card">
+        <h5>
+            <svg style="width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Text Understanding (NLP Layer)
+        </h5>
+
+        <!-- Alert Info Banner -->
+        <div class="nlp-alert">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>Our AI processing structures analyze text to classify intent, categorize requests, and extract critical parameters.</span>
+        </div>
+        
+        <div class="nlp-grid">
+            <!-- Left Side Input Card -->
+            <div class="panel-card">
+                <h6>Test NLP Processing</h6>
+                <textarea id="nlpText" class="form-textarea" rows="5" placeholder="Enter test query (e.g. Need urgent O+ blood help)..."></textarea>
+                <button class="btn btn-gold" onclick="processNLP()" style="margin-top:12px;">
+                    Process text string
+                </button>
+            </div>
+            
+            <!-- Right Side Output Card (Hidden by default) -->
+            <div class="panel-card" id="nlpResults" style="display: none;">
+                <h6>Extraction Results</h6>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+        
+        <!-- Info Footer List -->
+        <div>
+            <div class="how-it-works-title">How NLP Works Under the Hood</div>
+            <ul class="info-list">
+                <li class="info-item">
+                    <strong>Intent Detection</strong> Identifies structural demands (e.g. NEEDS vs OFFERS or SELL indices).
+                </li>
+                <li class="info-item">
+                    <strong>Category Classification</strong> Group mappings (e.g. Medical, Services, Real Estate, Marketplace).
+                </li>
+                <li class="info-item">
+                    <strong>Entity Extraction</strong> Parameter isolates (e.g. specific blood designations, budget frames, locales).
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery and AJAX handlers -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function processNLP() {
+        const text = $('#nlpText').val();
+        if (!text.trim()) {
+            showToast('Please enter some text', 'warning');
+            return;
+        }
+        
+        $.ajax({
+            url: '/api/preview-post',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ text: text }),
+            success: function(response) {
+                $('#nlpResults').show();
+                let html = `
+                    <p style="font-size:14px; margin-bottom:12px;"><strong>Original Text:</strong><br><span style="color:var(--muted-text); font-style:italic;">"${escapeHtml(text)}"</span></p>
+                    <hr class="divider-line">
+                    <p style="font-size:14px; margin-bottom:12px;"><strong>Intent:</strong> <span class="badge badge-high">${escapeHtml(response.intent)}</span></p>
+                    <p style="font-size:14px; margin-bottom:12px;"><strong>Category:</strong> <span class="badge">${escapeHtml(response.category)}</span></p>
+                    <p style="font-size:14px; margin-bottom:10px;"><strong>Entities Extracted:</strong></p>
+                    <ul class="reasons-list">
+                `;
+                
+                for (let [key, value] of Object.entries(response.entities)) {
+                    html += `<li><strong>${escapeHtml(key)}:</strong> ${escapeHtml(value)}</li>`;
+                }
+                
+                if (Object.keys(response.entities).length === 0) {
+                    html += '<li>No entities detected</li>';
+                }
+                
+                html += `</ul>`;
+                $('#resultsContent').html(html);
+            }
+        });
+    }
+
+    // Safety String encoder helper
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

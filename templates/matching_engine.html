@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+
+{% block title %}Matching Engine{% endblock %}
+
+{% block content %}
+<style>
+    /* Premium Matching Engine Styles */
+    .engine-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+
+    /* Core Section Card */
+    .engine-card {
+        background-color: #FFFFFF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        border-radius: 0;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .engine-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #5E5332; /* Signature Muted Gold */
+    }
+
+    .engine-card.secondary-card::before {
+        background-color: #0A0C10; /* Obsidian Black Accent */
+    }
+
+    .card-title-bar {
+        padding: 24px 30px;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #F8F9F5;
+    }
+
+    .card-title-bar h5 {
+        font-family: 'Playfair Display', serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #0A0C10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .engine-card-body {
+        padding: 30px;
+    }
+
+    /* Column Layouts */
+    .engine-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .column-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #5E5332;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(10, 12, 16, 0.05);
+        padding-bottom: 8px;
+    }
+
+    /* Alert / Message Boxes */
+    .alert {
+        padding: 16px 20px;
+        background-color: #F8F9F5;
+        border-left: 3px solid #5E5332;
+        font-size: 13.5px;
+        color: #242930;
+        margin-bottom: 24px;
+    }
+
+    .alert-success {
+        border-left-color: #C5A059;
+    }
+
+    /* Sidebar Small Post Cards */
+    .mini-post-card {
+        background-color: #F8F9F5;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .mini-post-card:hover {
+        border-color: #5E5332;
+        background-color: #FFFFFF;
+    }
+
+    .mini-post-card p {
+        font-size: 13px;
+        color: #606875;
+        line-height: 1.5;
+        margin-top: 6px;
+    }
+
+    /* Dynamically Loaded Match Cards */
+    .match-item-card {
+        background-color: #FFFFFF;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+        padding: 24px;
+        margin-bottom: 15px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .match-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(10, 12, 16, 0.04);
+        border-color: #5E5332;
+    }
+
+    /* Badges */
+    .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .badge {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 5px 12px;
+        background-color: #F4F5EF;
+        color: #0A0C10;
+        border: 1px solid rgba(10, 12, 16, 0.08);
+    }
+
+    .badge-high {
+        background-color: rgba(197, 160, 89, 0.15);
+        color: #5E5332;
+        border-color: rgba(197, 160, 89, 0.2);
+    }
+
+    /* Action Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 18px;
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-gold {
+        background-color: #5E5332;
+        color: #FFFFFF;
+        border: 1px solid #5E5332;
+    }
+
+    .btn-gold:hover {
+        background-color: #0A0C10;
+        border-color: #0A0C10;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #0A0C10;
+        border: 1.5px solid #0A0C10;
+    }
+
+    .btn-outline:hover {
+        background-color: #0A0C10;
+        color: #FFFFFF;
+    }
+
+    /* Custom Modern loading spinner */
+    .custom-loader {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 2px solid rgba(94, 83, 50, 0.1);
+        border-left-color: #5E5332;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @media (max-width: 900px) {
+        .engine-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="engine-container fade-in">
+    
+    <!-- Outgoing Matches Section -->
+    <div class="engine-card">
+        <div class="card-title-bar">
+            <h5>
+                <svg style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Find Helpers for Your Posts
+            </h5>
+        </div>
+        <div class="engine-card-body">
+            <div class="alert">
+                Select an active notice from the column sidebar to view compatible assistance candidates.
+            </div>
+            
+            <div class="engine-grid">
+                <!-- Left Post Sidebar list -->
+                <div>
+                    <div class="column-title">Your Active Notices</div>
+                    <div id="userPostsList">
+                        {% if posts %}
+                            {% for post in posts %}
+                            <div class="mini-post-card">
+                                <span style="font-size:11px; font-weight:600; text-transform:uppercase; color:#5E5332;">{{ post.category }}</span>
+                                <p>{{ post.description[:80] }}...</p>
+                                <div style="font-size:11px; color:#9EA4B0; margin-top:8px;">📍 {{ post.location or 'Location not specified' }}</div>
+                                <button class="btn btn-gold btn-small" style="margin-top:12px; width:100%;" onclick="findMatches({{ post.id }})">
+                                    Analyze matches
+                                </button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="font-size:13px; color:#606875; font-style:italic;">No active announcements.<br><a href="/create-post" style="color:#5E5332; font-weight:600;">Create notice</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Right dynamic Matches list -->
+                <div>
+                    <div class="column-title">Analyzed Candidates</div>
+                    <div id="matchesList">
+                        <div style="text-align:center; padding:50px; color:#9EA4B0; font-size:14px;">
+                            👈 Select an active notice from the left to load matching candidate streams.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming Matches Section -->
+    <div class="engine-card secondary-card">
+        <div class="card-title-bar">
+            <h5>
+                <svg style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Opportunities Matching Your Profile
+            </h5>
+        </div>
+        <div class="engine-card-body">
+            <div class="alert alert-success">
+                System suggestions that tightly fit your coordinates, registered skills, and interest indexes.
+            </div>
+            <div id="incomingMatchesList">
+                <div style="text-align:center; padding:40px; color:#606875;">
+                    <div class="custom-loader"></div>
+                    <p style="font-size:13px;">Analyzing available listings...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- jQuery Library integration -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        loadIncomingMatches();
+    });
+
+    // Find matches for a specific post
+    function findMatches(postId) {
+        $('#matchesList').html('<div style="text-align:center; padding:40px;"><div class="custom-loader"></div><p style="font-size:13px; color:#606875;">Analyzing database entries...</p></div>');
+        
+        $.ajax({
+            url: `/api/get-matches/${postId}`,
+            method: 'GET',
+            success: function(response) {
+                displayMatches(response.matches);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('#matchesList').html(`
+                    <div class="alert" style="border-left-color:#ff4d4d;">
+                        Database parameters offline. Please verify endpoint alignment.
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Display outgoing matches (re-skinned JS string generator)
+    function displayMatches(matches) {
+        if (!matches || matches.length === 0) {
+            $('#matchesList').html(`
+                <div class="alert">
+                    No active candidates meet requirements. Consider refining details in original notices.
+                </div>
+            `);
+            return;
+        }
+        
+        let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+        matches.forEach(match => {
+            const user = match.user;
+            const score = Math.round(match.score);
+            const scoreBadge = score >= 70 ? '🏆 Elite Candidate' : (score >= 40 ? '👍 Stable Fit' : '🤝 Possible Option');
+            
+            html += `
+                <div class="match-item-card">
+                    <div style="flex:1;">
+                        <div class="badge-row">
+                            <span class="badge badge-high">${score}% Compatibility</span>
+                            <span class="badge">${scoreBadge}</span>
+                        </div>
+                        <h6 style="font-family:'Playfair Display', serif; font-size:20px; font-weight:700; color:#0A0C10; margin-bottom:6px;">
+                            ${escapeHtml(user.name || user.username || 'Anonymous Member')}
+                        </h6>
+                        <p style="font-size:13px; color:#606875; line-height:1.5; margin-bottom:12px;">${escapeHtml(match.reason || 'Based on coordinate alignment parameters.')}</p>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; font-size:12px; color:#606875; border-top:1px solid rgba(10,12,16,0.04); padding-top:12px;">
+                            <div>📍 Location: ${escapeHtml(user.location || 'Not Specified')}</div>
+                            <div>🛡️ Trust Score: ${escapeHtml(user.trust_score || '50')}% Metric</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button class="btn btn-gold btn-small" onclick="connectWithUser(${user.id})">
+                            Profile
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        $('#matchesList').html(html);
+    }
+    
+    // Fetch and load incoming matches
+    function loadIncomingMatches() {
+        $.ajax({
+            url: '/api/get-all-matches',
+            method: 'GET',
+            success: function(response) {
+                displayIncomingMatches(response.matches);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading incoming matches:', error);
+                $('#incomingMatchesList').html(`
+                    <div class="alert" style="border-left-color:#ff4d4d;">
+                        Opportunities table currently unreachable. Complete profile settings to initialize.
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Display incoming opportunities matching profile (re-skinned JS string generator)
+    function displayIncomingMatches(matches) {
+        if (!matches || matches.length === 0) {
+            $('#incomingMatchesList').html(`
+                <div class="alert">
+                    No active system matches located. Populate skills or interests criteria inside your configuration file to trigger matching loops.
+                    <div style="display:flex; gap:12px; margin-top:15px;">
+                        <a href="/profile-setup" class="btn btn-gold btn-small">Settings</a>
+                        <a href="/create-post" class="btn btn-outline btn-small">Create Post</a>
+                    </div>
+                </div>
+            `);
+            return;
+        }
+        
+        let html = '<div style="display:flex; flex-direction:column; gap:15px;">';
+        matches.forEach(match => {
+            const score = Math.round(match.match_score);
+            
+            html += `
+                <div class="match-item-card">
+                    <div style="flex:1;">
+                        <div class="badge-row">
+                            <span class="badge badge-high">${score}% Suitability Score</span>
+                            <span class="badge">${escapeHtml(match.post_category)}</span>
+                            <span class="badge" style="background:#0A0C10; color:#fff;">${escapeHtml(match.post_intent)}</span>
+                        </div>
+                        <h6 style="font-family:'Inter', sans-serif; font-size:15px; font-weight:500; color:#0A0C10; margin-bottom:12px; line-height:1.5;">
+                            "${escapeHtml(match.post_description.substring(0, 150))}${match.post_description.length > 150 ? '...' : ''}"
+                        </h6>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; font-size:12px; color:#606875; border-top:1px solid rgba(10,12,16,0.04); padding-top:12px;">
+                            <div>📍 Notice Location: ${escapeHtml(match.post_location || 'Not Specified')}</div>
+                            <div>👤 Creator: ${escapeHtml(match.creator.name || 'Resident')}</div>
+                        </div>
+                        ${match.match_reasons && match.match_reasons.length > 0 ? `
+                            <div style="margin-top:12px; padding:12px 16px; background:#F8F9F5; border-left:2px solid #C5A059;">
+                                <div style="font-size:10px; font-weight:700; text-transform:uppercase; color:#5E5332; margin-bottom:4px;">Intersection Reason</div>
+                                ${match.match_reasons.map(reason => `<div style="font-size:12px; color:#606875;">✓ ${escapeHtml(reason)}</div>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button class="btn btn-gold btn-small" onclick="viewPost(${match.post_id})">
+                            Details
+                        </button>
+                        <button class="btn btn-outline btn-small" onclick="respondToPost(${match.post_id})">
+                            Respond
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        $('#incomingMatchesList').html(html);
+    }
+    
+    // Page redirect callback actions
+    function connectWithUser(userId) {
+        window.location.href = `/profile/${userId}`;
+    }
+    
+    function viewPost(postId) {
+        window.location.href = `/view-post/${postId}`;
+    }
+    
+    function respondToPost(postId) {
+        if (confirm('Would you like to respond to this post? The post creator will be notified.')) {
+            window.location.href = `/respond-to-post/${postId}`;
+        }
+    }
+    
+    // Safety encoder helper
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}
