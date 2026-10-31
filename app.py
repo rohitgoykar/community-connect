@@ -15,6 +15,8 @@ import json
 import os
 import ssl
 import smtplib 
+import threading
+import urllib.request
 from email.mime.text import MIMEText 
 from email.mime.multipart import MIMEMultipart  
 
@@ -400,12 +402,13 @@ EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "dqsnzbjvuawgxyaw").replace(" 
 SEND_REAL_EMAIL = True  # Set to True to send real emails
 
 def send_otp_email(to_email, otp):
-    """Send OTP via email using Gmail SMTP with proper SSL context for cloud hosting"""
+    """Send OTP via email with HTTP API fallback and Gmail SMTP for cloud hosting"""
     # Read credentials fresh on every call so Render env vars are always picked up
     email_address = os.environ.get("EMAIL_ADDRESS", "").strip()
     email_password = os.environ.get("EMAIL_PASSWORD", "").replace(" ", "").strip()
+    brevo_api_key = os.environ.get("BREVO_API_KEY", "").strip()
+    resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
 
-    # Fallback to hardcoded only if env vars are completely missing
     if not email_address:
         email_address = "oopj435@gmail.com"
     if not email_password:
@@ -413,60 +416,107 @@ def send_otp_email(to_email, otp):
 
     print("\n" + "="*60)
     print(f"📧 OTP DISPATCH → Recipient: {to_email}")
-    print(f"📤 Sender (from env): {email_address}")
+    print(f"📤 Sender: {email_address}")
     print(f"🔑 OTP Code: {otp}")
     print("="*60 + "\n")
 
+    text_content = f"Your Smart Community Login OTP is: {otp}\nThis code is valid for 5 minutes."
+    html_content = f"""<!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F6F9; color: #0A0C10; margin: 0; padding: 30px 15px;">
+        <div style="max-width: 520px; margin: 0 auto; background: #FFFFFF; border: 1.5px solid rgba(197, 160, 89, 0.45); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+            <div style="background: linear-gradient(135deg, #FFFFFF, #FAFBF7); padding: 25px 30px; border-bottom: 2px solid #C5A059; text-align: center;">
+                <h1 style="color: #0A0C10; font-size: 22px; margin: 0; letter-spacing: 1.5px; text-transform: uppercase;">Smart<span style="color: #C5A059;">Community</span></h1>
+                <p style="color: #5E5332; font-size: 11px; letter-spacing: 2px; margin: 6px 0 0; text-transform: uppercase; font-weight: 700;">&#10022; Secure Verification Pass &#10022;</p>
+            </div>
+            <div style="padding: 35px 30px; text-align: center;">
+                <p style="color: #0A0C10; font-size: 15px; margin: 0 0 16px; line-height: 1.6; font-weight: 600;">Welcome to Smart Community,</p>
+                <p style="color: #4A5568; font-size: 14px; margin: 0 0 25px; line-height: 1.6;">Use the one-time security passcode below to access your account:</p>
+                <div style="display: inline-block; background: #FAFBF7; border: 2px solid #C5A059; border-radius: 8px; padding: 16px 36px; margin-bottom: 25px;">
+                    <span style="font-family: monospace, Courier, monospace; font-size: 36px; font-weight: 800; color: #0A0C10; letter-spacing: 8px;">{otp}</span>
+                </div>
+                <p style="color: #718096; font-size: 12.5px; margin: 0; line-height: 1.6;">This passcode is valid for <strong>5 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
+            </div>
+            <div style="background: #F8F9FA; padding: 18px 30px; text-align: center; border-top: 1px solid rgba(10,12,16,0.06); font-size: 11.5px; color: #718096;">
+                &copy; 2026 Smart Community Network &bull; Connecting Neighborhoods Securely
+            </div>
+        </div>
+    </body>
+    </html>"""
+
+    # 1. Brevo HTTP API (Port 443 HTTPS - NEVER blocked on Render Free tier)
+    if brevo_api_key:
+        try:
+            req_data = json.dumps({
+                "sender": {"name": "Smart Community Connect", "email": email_address},
+                "to": [{"email": to_email}],
+                "subject": f"Your OTP is {otp} - Smart Community",
+                "htmlContent": html_content
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                "https://api.brevo.com/v3/smtp/email",
+                data=req_data,
+                headers={
+                    "api-key": brevo_api_key,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                if resp.status in (200, 201):
+                    print(f"✅ OTP successfully sent via Brevo HTTP API to {to_email}")
+                    return True
+        except Exception as e_brevo:
+            print(f"⚠️ Brevo HTTP API error: {e_brevo}")
+
+    # 2. Resend HTTP API (Port 443 HTTPS - NEVER blocked on Render Free tier)
+    if resend_api_key:
+        try:
+            req_data = json.dumps({
+                "from": f"Smart Community <onboarding@resend.dev>",
+                "to": [to_email],
+                "subject": f"Your OTP is {otp} - Smart Community",
+                "html": html_content
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=req_data,
+                headers={
+                    "Authorization": f"Bearer {resend_api_key}",
+                    "Content-Type": "application/json"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                if resp.status in (200, 201):
+                    print(f"✅ OTP successfully sent via Resend HTTP API to {to_email}")
+                    return True
+        except Exception as e_resend:
+            print(f"⚠️ Resend HTTP API error: {e_resend}")
+
+    # 3. SMTP over Port 465 SSL (tight 3.5s timeout so cloud routers never freeze)
     try:
         msg = MIMEMultipart('alternative')
         msg['From'] = f"Smart Community Connect <{email_address}>"
         msg['To'] = to_email
         msg['Subject'] = f"Your OTP is {otp} - Smart Community"
         msg['X-Priority'] = '1'
-
-        text_content = f"Your Smart Community Login OTP is: {otp}\nThis code is valid for 5 minutes."
-        html_content = f"""<!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"></head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F6F9; color: #0A0C10; margin: 0; padding: 30px 15px;">
-            <div style="max-width: 520px; margin: 0 auto; background: #FFFFFF; border: 1.5px solid rgba(197, 160, 89, 0.45); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
-                <div style="background: linear-gradient(135deg, #FFFFFF, #FAFBF7); padding: 25px 30px; border-bottom: 2px solid #C5A059; text-align: center;">
-                    <h1 style="color: #0A0C10; font-size: 22px; margin: 0; letter-spacing: 1.5px; text-transform: uppercase;">Smart<span style="color: #C5A059;">Community</span></h1>
-                    <p style="color: #5E5332; font-size: 11px; letter-spacing: 2px; margin: 6px 0 0; text-transform: uppercase; font-weight: 700;">&#10022; Secure Verification Pass &#10022;</p>
-                </div>
-                <div style="padding: 35px 30px; text-align: center;">
-                    <p style="color: #0A0C10; font-size: 15px; margin: 0 0 16px; line-height: 1.6; font-weight: 600;">Welcome to Smart Community,</p>
-                    <p style="color: #4A5568; font-size: 14px; margin: 0 0 25px; line-height: 1.6;">Use the one-time security passcode below to access your account:</p>
-                    <div style="display: inline-block; background: #FAFBF7; border: 2px solid #C5A059; border-radius: 8px; padding: 16px 36px; margin-bottom: 25px;">
-                        <span style="font-family: monospace, Courier, monospace; font-size: 36px; font-weight: 800; color: #0A0C10; letter-spacing: 8px;">{otp}</span>
-                    </div>
-                    <p style="color: #718096; font-size: 12.5px; margin: 0; line-height: 1.6;">This passcode is valid for <strong>5 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
-                </div>
-                <div style="background: #F8F9FA; padding: 18px 30px; text-align: center; border-top: 1px solid rgba(10,12,16,0.06); font-size: 11.5px; color: #718096;">
-                    &copy; 2026 Smart Community Network &bull; Connecting Neighborhoods Securely
-                </div>
-            </div>
-        </body>
-        </html>"""
-
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
 
-        # Method 1: SMTP_SSL on Port 465 with explicit SSL context (required on Render/cloud)
+        ssl_context = ssl.create_default_context()
         try:
-            ssl_context = ssl.create_default_context()
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ssl_context, timeout=20) as server:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ssl_context, timeout=3.5) as server:
                 server.login(email_address, email_password)
                 server.send_message(msg)
             print(f"✅ OTP delivered via Port 465 SSL to {to_email}")
             return True
         except Exception as e_ssl:
-            print(f"⚠️ Port 465 failed: {type(e_ssl).__name__}: {e_ssl}")
+            print(f"⚠️ Port 465 SSL notice: {e_ssl}")
 
-        # Method 2: STARTTLS on Port 587 with SSL context
+        # 4. SMTP over Port 587 STARTTLS (tight 3.5s timeout)
         try:
-            ssl_context = ssl.create_default_context()
-            with smtplib.SMTP('smtp.gmail.com', 587, timeout=20) as server:
+            with smtplib.SMTP('smtp.gmail.com', 587, timeout=3.5) as server:
                 server.ehlo()
                 server.starttls(context=ssl_context)
                 server.ehlo()
@@ -475,14 +525,13 @@ def send_otp_email(to_email, otp):
             print(f"✅ OTP delivered via Port 587 STARTTLS to {to_email}")
             return True
         except Exception as e_tls:
-            print(f"⚠️ Port 587 failed: {type(e_tls).__name__}: {e_tls}")
-
-        print(f"❌ Both SMTP methods failed for {to_email}. Check EMAIL_ADDRESS and EMAIL_PASSWORD env vars on Render.")
-        return False
+            print(f"⚠️ Port 587 STARTTLS notice: {e_tls}")
 
     except Exception as e:
-        print(f"❌ Email build/send error: {type(e).__name__}: {e}")
-        return False
+        print(f"❌ SMTP preparation error: {e}")
+
+    print(f"❌ All email dispatch methods failed for {to_email}.")
+    return False
 
 
 def send_notification_email(to_email, subject, message):
@@ -998,10 +1047,10 @@ def login():
             db.session.add(otp_session)
             db.session.commit()
             
-            # Send OTP to user's registered email
-            email_sent = send_otp_email(user.email, otp)
+            # Send OTP to user's registered email asynchronously in background thread
+            threading.Thread(target=send_otp_email, args=(user.email, otp), daemon=True).start()
             session['temp_username'] = username
-            session['email_sent'] = email_sent
+            session['email_sent'] = True
             session['last_otp'] = otp
             
             masked_email = user.email
@@ -1084,8 +1133,9 @@ def resend_otp():
     db.session.add(otp_session)
     db.session.commit()
     
-    email_sent = send_otp_email(user.email, otp)
-    session['email_sent'] = email_sent
+    # Dispatch OTP in background thread
+    threading.Thread(target=send_otp_email, args=(user.email, otp), daemon=True).start()
+    session['email_sent'] = True
     session['last_otp'] = otp
     
     masked_email = user.email
