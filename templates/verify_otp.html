@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Access Pass - Smart Community</title>
     
-    <!-- Premium Google Fonts Pairing -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,11 +23,7 @@
             --transition-smooth: all 0.35s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -64,7 +59,6 @@
             font-weight: 700;
         }
 
-        /* Golden Ticket Pass (Light Mode) */
         .ticket-form {
             width: 100%;
             max-width: 680px;
@@ -85,7 +79,6 @@
             box-shadow: 0 20px 55px rgba(0, 0, 0, 0.12), 0 0 40px rgba(197, 160, 89, 0.25);
         }
 
-        /* 6-box OTP digits */
         .otp-boxes-grid {
             display: flex;
             justify-content: center;
@@ -126,74 +119,53 @@
             align-items: center;
             gap: 8px;
         }
-
-        .backup-toggle-btn {
-            background: none;
-            border: 1px dashed rgba(94, 83, 50, 0.4);
-            border-radius: 20px;
-            padding: 7px 18px;
-            font-size: 12px;
-            color: #5E5332;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .backup-toggle-btn:hover {
-            background: rgba(197, 160, 89, 0.08);
-            border-color: #C5A059;
-        }
     </style>
 </head>
 <body>
 
     <div class="page-header">
         <h1>Two-Factor Verification</h1>
-        <p>✦ High-Trust Security Pass ✦</p>
+        <p>&#10022; High-Trust Security Pass &#10022;</p>
     </div>
 
     <div class="ticket-form">
         <div style="text-align: center;">
             <div class="email-pill">
-                <span>🔐</span>
-                <span>Code sent to: <strong style="color: #C5A059;">{{ masked_email or user.email if user else 'your registered email' }}</strong></span>
+                <span>&#128272;</span>
+                <span>Code sent to: <strong style="color: #C5A059;">{{ masked_email or 'your registered email' }}</strong></span>
             </div>
         </div>
 
         {% if error %}
-        <div style="margin: 22px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.12); color: #991B1B; text-align: center;">
-            ⚠️ {{ error }}
-        </div>
-        {% endif %}
-
-        {% if not email_sent %}
-        <!-- Cloud SMTP Delay Banner: shown only when Port 465 & 587 both failed -->
-        <div style="margin: 18px 0 10px; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #D97706; background: rgba(251, 191, 36, 0.12); color: #92400E; font-size: 13px; line-height: 1.6;">
-            <strong>⚠️ Email Delivery Delayed by Cloud Mail Server</strong><br>
-            The OTP email could not be delivered right now (cloud SMTP restriction). Your one-time access code is displayed below for verification:
-            <div style="margin: 12px 0 4px; text-align: center; background: #FFFBEB; border: 2px dashed #D97706; border-radius: 6px; padding: 12px 0;">
-                <span style="font-family: monospace; font-size: 30px; font-weight: 900; letter-spacing: 10px; color: #92400E;">{{ last_otp }}</span>
-            </div>
-            <small style="color: #B45309;">Copy this code into the boxes below to sign in.</small>
+        <div style="margin: 22px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.10); color: #991B1B; text-align: center;">
+            &#9888;&#65039; {{ error }}
         </div>
         {% endif %}
 
         {% if success %}
         <div style="margin: 18px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #059669; background: rgba(16, 185, 129, 0.10); color: #065F46; text-align: center;">
-            ✅ {{ success }}
+            &#9989; {{ success }}
+        </div>
+        {% endif %}
+
+        {% if not email_sent %}
+        <!-- Only shown if BOTH smtp methods fail — prompts user to check Render logs -->
+        <div style="margin: 18px 0 10px; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #D97706; background: rgba(251, 191, 36, 0.10); color: #92400E; font-size: 13px; line-height: 1.6;">
+            <strong>&#9888; Email not received?</strong><br>
+            There was a delay sending to <strong>{{ masked_email }}</strong>. Please click <strong>Resend Code</strong> below. If the problem continues, contact support.
         </div>
         {% endif %}
 
         <form method="POST" action="/verify-otp" id="otpForm">
-            <!-- Hidden actual field for Flask -->
             <input type="hidden" name="otp" id="fullOtp">
 
             <div class="otp-boxes-grid">
-                <input type="text" class="otp-box" maxlength="1" autofocus data-index="0" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" data-index="1">
-                <input type="text" class="otp-box" maxlength="1" data-index="2">
-                <input type="text" class="otp-box" maxlength="1" data-index="3">
-                <input type="text" class="otp-box" maxlength="1" data-index="4">
-                <input type="text" class="otp-box" maxlength="1" data-index="5">
+                <input type="text" class="otp-box" maxlength="1" autofocus data-index="0" autocomplete="one-time-code" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" data-index="1" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" data-index="2" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" data-index="3" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" data-index="4" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" data-index="5" inputmode="numeric">
             </div>
 
             <button type="submit" class="btn-luxury-gold" style="width: 100%; padding: 16px; font-size: 13px; letter-spacing: 2px;">
@@ -201,23 +173,10 @@
             </button>
         </form>
 
-        {% if email_sent and last_otp %}
-        <!-- Didn't receive email? toggle - shows backup OTP on demand -->
-        <div style="margin-top: 16px; text-align: center;">
-            <button class="backup-toggle-btn" onclick="toggleBackupOtp()" id="backupToggleBtn">
-                🔍 Didn't receive email? Click to reveal code
-            </button>
-            <div id="backupOtpBox" style="display:none; margin-top: 12px; padding: 12px 16px; background: #FFFBEB; border: 2px dashed #D97706; border-radius: 8px; text-align: center;">
-                <p style="font-size: 12px; color: #92400E; margin: 0 0 8px;">🔑 Your backup access code (for testing/verification):</p>
-                <span style="font-family: monospace; font-size: 28px; font-weight: 900; letter-spacing: 8px; color: #92400E;">{{ last_otp }}</span>
-            </div>
-        </div>
-        {% endif %}
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 13px; color: var(--muted-text);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 13px; color: var(--muted-text);">
             <a href="/login" style="color: #4A5568; text-decoration: none; font-weight: 600;">&larr; Back to Login</a>
             <a href="/resend-otp" id="resendBtn" style="color: #5E5332; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                <span>🔄</span> Resend Code
+                <span>&#128260;</span> Resend Code
             </a>
         </div>
     </div>
@@ -230,6 +189,8 @@
 
         boxes.forEach((box, i) => {
             box.addEventListener('input', (e) => {
+                // Only allow digits
+                box.value = box.value.replace(/\D/g, '');
                 if (box.value.length === 1 && i < boxes.length - 1) {
                     boxes[i + 1].focus();
                 }
@@ -263,18 +224,6 @@
             let combined = '';
             boxes.forEach(b => combined += b.value);
             fullOtpInput.value = combined;
-        }
-
-        function toggleBackupOtp() {
-            const box = document.getElementById('backupOtpBox');
-            const btn = document.getElementById('backupToggleBtn');
-            if (box.style.display === 'none') {
-                box.style.display = 'block';
-                btn.textContent = '🔒 Hide backup code';
-            } else {
-                box.style.display = 'none';
-                btn.textContent = '🔍 Didn\'t receive email? Click to reveal code';
-            }
         }
 
         form.addEventListener('submit', (e) => {

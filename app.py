@@ -13,6 +13,7 @@ import re
 from datetime import datetime
 import json
 import os
+import ssl
 import smtplib 
 from email.mime.text import MIMEText 
 from email.mime.multipart import MIMEMultipart  
@@ -399,24 +400,30 @@ EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "dqsnzbjvuawgxyaw").replace(" 
 SEND_REAL_EMAIL = True  # Set to True to send real emails
 
 def send_otp_email(to_email, otp):
-    """Send OTP via email with timeout and proper error handling"""
-    # Always print prominently to console for testing / instant access
+    """Send OTP via email using Gmail SMTP with proper SSL context for cloud hosting"""
+    # Read credentials fresh on every call so Render env vars are always picked up
+    email_address = os.environ.get("EMAIL_ADDRESS", "").strip()
+    email_password = os.environ.get("EMAIL_PASSWORD", "").replace(" ", "").strip()
+
+    # Fallback to hardcoded only if env vars are completely missing
+    if not email_address:
+        email_address = "oopj435@gmail.com"
+    if not email_password:
+        email_password = "dqsnzbjvuawgxyaw"
+
     print("\n" + "="*60)
-    print(f"📧 DISPATCHING OTP TO REGISTERED EMAIL: {to_email}")
-    print(f"🔑 6-DIGIT PASSCODE: {otp}")
-    print(f"📤 SENDER ADDRESS: {EMAIL_ADDRESS}")
+    print(f"📧 OTP DISPATCH → Recipient: {to_email}")
+    print(f"📤 Sender (from env): {email_address}")
+    print(f"🔑 OTP Code: {otp}")
     print("="*60 + "\n")
-    
-    if not SEND_REAL_EMAIL:
-        return True
-    
+
     try:
         msg = MIMEMultipart('alternative')
-        msg['From'] = f"Smart Community Connect <{EMAIL_ADDRESS}>"
+        msg['From'] = f"Smart Community Connect <{email_address}>"
         msg['To'] = to_email
-        msg['Subject'] = f"🔐 Your Security Passcode: {otp} - Smart Community"
+        msg['Subject'] = f"Your OTP is {otp} - Smart Community"
         msg['X-Priority'] = '1'
-        
+
         text_content = f"Your Smart Community Login OTP is: {otp}\nThis code is valid for 5 minutes."
         html_content = f"""<!DOCTYPE html>
         <html>
@@ -425,16 +432,14 @@ def send_otp_email(to_email, otp):
             <div style="max-width: 520px; margin: 0 auto; background: #FFFFFF; border: 1.5px solid rgba(197, 160, 89, 0.45); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
                 <div style="background: linear-gradient(135deg, #FFFFFF, #FAFBF7); padding: 25px 30px; border-bottom: 2px solid #C5A059; text-align: center;">
                     <h1 style="color: #0A0C10; font-size: 22px; margin: 0; letter-spacing: 1.5px; text-transform: uppercase;">Smart<span style="color: #C5A059;">Community</span></h1>
-                    <p style="color: #5E5332; font-size: 11px; letter-spacing: 2px; margin: 6px 0 0; text-transform: uppercase; font-weight: 700;">✦ Secure Verification Pass ✦</p>
+                    <p style="color: #5E5332; font-size: 11px; letter-spacing: 2px; margin: 6px 0 0; text-transform: uppercase; font-weight: 700;">&#10022; Secure Verification Pass &#10022;</p>
                 </div>
                 <div style="padding: 35px 30px; text-align: center;">
                     <p style="color: #0A0C10; font-size: 15px; margin: 0 0 16px; line-height: 1.6; font-weight: 600;">Welcome to Smart Community,</p>
-                    <p style="color: #4A5568; font-size: 14px; margin: 0 0 25px; line-height: 1.6;">Use the one-time security passcode below to access your neighborhood account:</p>
-                    
+                    <p style="color: #4A5568; font-size: 14px; margin: 0 0 25px; line-height: 1.6;">Use the one-time security passcode below to access your account:</p>
                     <div style="display: inline-block; background: #FAFBF7; border: 2px solid #C5A059; border-radius: 8px; padding: 16px 36px; margin-bottom: 25px;">
                         <span style="font-family: monospace, Courier, monospace; font-size: 36px; font-weight: 800; color: #0A0C10; letter-spacing: 8px;">{otp}</span>
                     </div>
-                    
                     <p style="color: #718096; font-size: 12.5px; margin: 0; line-height: 1.6;">This passcode is valid for <strong>5 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
                 </div>
                 <div style="background: #F8F9FA; padding: 18px 30px; text-align: center; border-top: 1px solid rgba(10,12,16,0.06); font-size: 11.5px; color: #718096;">
@@ -443,37 +448,42 @@ def send_otp_email(to_email, otp):
             </div>
         </body>
         </html>"""
-        
+
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
-        
-        # 1. Primary: Port 465 with SSL (most reliable on cloud platforms like Render)
+
+        # Method 1: SMTP_SSL on Port 465 with explicit SSL context (required on Render/cloud)
         try:
-            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
-            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            server.send_message(msg)
-            server.quit()
-            print(f"✓ OTP successfully delivered via Gmail SMTP_SSL (Port 465) to {to_email}")
+            ssl_context = ssl.create_default_context()
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ssl_context, timeout=20) as server:
+                server.login(email_address, email_password)
+                server.send_message(msg)
+            print(f"✅ OTP delivered via Port 465 SSL to {to_email}")
             return True
         except Exception as e_ssl:
-            print(f"⚠️ Port 465 SSL notice: {e_ssl}")
-        
-        # 2. Fallback: Port 587 with STARTTLS
-        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        
-        print(f"✓ OTP successfully delivered via Gmail STARTTLS (Port 587) to {to_email}")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Gmail SMTP error on both ports: {e}")
-        print(f"📝 Backup: OTP for testing is: {otp}")
+            print(f"⚠️ Port 465 failed: {type(e_ssl).__name__}: {e_ssl}")
+
+        # Method 2: STARTTLS on Port 587 with SSL context
+        try:
+            ssl_context = ssl.create_default_context()
+            with smtplib.SMTP('smtp.gmail.com', 587, timeout=20) as server:
+                server.ehlo()
+                server.starttls(context=ssl_context)
+                server.ehlo()
+                server.login(email_address, email_password)
+                server.send_message(msg)
+            print(f"✅ OTP delivered via Port 587 STARTTLS to {to_email}")
+            return True
+        except Exception as e_tls:
+            print(f"⚠️ Port 587 failed: {type(e_tls).__name__}: {e_tls}")
+
+        print(f"❌ Both SMTP methods failed for {to_email}. Check EMAIL_ADDRESS and EMAIL_PASSWORD env vars on Render.")
         return False
+
+    except Exception as e:
+        print(f"❌ Email build/send error: {type(e).__name__}: {e}")
+        return False
+
 
 def send_notification_email(to_email, subject, message):
     """Send notification email for matches"""
