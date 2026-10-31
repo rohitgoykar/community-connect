@@ -126,6 +126,22 @@
             align-items: center;
             gap: 8px;
         }
+
+        .backup-toggle-btn {
+            background: none;
+            border: 1px dashed rgba(94, 83, 50, 0.4);
+            border-radius: 20px;
+            padding: 7px 18px;
+            font-size: 12px;
+            color: #5E5332;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .backup-toggle-btn:hover {
+            background: rgba(197, 160, 89, 0.08);
+            border-color: #C5A059;
+        }
     </style>
 </head>
 <body>
@@ -144,8 +160,26 @@
         </div>
 
         {% if error %}
-        <div style="margin: 22px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.18); color: #FCA5A5; text-align: center;">
+        <div style="margin: 22px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #DC2626; background: rgba(239, 68, 68, 0.12); color: #991B1B; text-align: center;">
             ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        {% if not email_sent %}
+        <!-- Cloud SMTP Delay Banner: shown only when Port 465 & 587 both failed -->
+        <div style="margin: 18px 0 10px; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #D97706; background: rgba(251, 191, 36, 0.12); color: #92400E; font-size: 13px; line-height: 1.6;">
+            <strong>⚠️ Email Delivery Delayed by Cloud Mail Server</strong><br>
+            The OTP email could not be delivered right now (cloud SMTP restriction). Your one-time access code is displayed below for verification:
+            <div style="margin: 12px 0 4px; text-align: center; background: #FFFBEB; border: 2px dashed #D97706; border-radius: 6px; padding: 12px 0;">
+                <span style="font-family: monospace; font-size: 30px; font-weight: 900; letter-spacing: 10px; color: #92400E;">{{ last_otp }}</span>
+            </div>
+            <small style="color: #B45309;">Copy this code into the boxes below to sign in.</small>
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div style="margin: 18px 0 10px; padding: 13px 18px; border-radius: 6px; font-size: 13.5px; border-left: 4px solid #059669; background: rgba(16, 185, 129, 0.10); color: #065F46; text-align: center;">
+            ✅ {{ success }}
         </div>
         {% endif %}
 
@@ -163,11 +197,24 @@
             </div>
 
             <button type="submit" class="btn-luxury-gold" style="width: 100%; padding: 16px; font-size: 13px; letter-spacing: 2px;">
-                Verify Pass & Access Portal &rarr;
+                Verify Pass &amp; Access Portal &rarr;
             </button>
         </form>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 13px; color: var(--muted-text);">
+        {% if email_sent and last_otp %}
+        <!-- Didn't receive email? toggle - shows backup OTP on demand -->
+        <div style="margin-top: 16px; text-align: center;">
+            <button class="backup-toggle-btn" onclick="toggleBackupOtp()" id="backupToggleBtn">
+                🔍 Didn't receive email? Click to reveal code
+            </button>
+            <div id="backupOtpBox" style="display:none; margin-top: 12px; padding: 12px 16px; background: #FFFBEB; border: 2px dashed #D97706; border-radius: 8px; text-align: center;">
+                <p style="font-size: 12px; color: #92400E; margin: 0 0 8px;">🔑 Your backup access code (for testing/verification):</p>
+                <span style="font-family: monospace; font-size: 28px; font-weight: 900; letter-spacing: 8px; color: #92400E;">{{ last_otp }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 13px; color: var(--muted-text);">
             <a href="/login" style="color: #4A5568; text-decoration: none; font-weight: 600;">&larr; Back to Login</a>
             <a href="/resend-otp" id="resendBtn" style="color: #5E5332; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
                 <span>🔄</span> Resend Code
@@ -218,6 +265,18 @@
             fullOtpInput.value = combined;
         }
 
+        function toggleBackupOtp() {
+            const box = document.getElementById('backupOtpBox');
+            const btn = document.getElementById('backupToggleBtn');
+            if (box.style.display === 'none') {
+                box.style.display = 'block';
+                btn.textContent = '🔒 Hide backup code';
+            } else {
+                box.style.display = 'none';
+                btn.textContent = '🔍 Didn\'t receive email? Click to reveal code';
+            }
+        }
+
         form.addEventListener('submit', (e) => {
             syncOtp();
             if (fullOtpInput.value.length < 6) {
@@ -230,6 +289,5 @@
             }
         });
     </script>
-    <script src="{{ url_for('static', filename='app-ui.js') }}"></script>
 </body>
 </html>

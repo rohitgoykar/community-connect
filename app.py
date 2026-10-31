@@ -447,7 +447,19 @@ def send_otp_email(to_email, otp):
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
         
-        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=12)
+        # 1. Primary: Port 465 with SSL (most reliable on cloud platforms like Render)
+        try:
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            print(f"✓ OTP successfully delivered via Gmail SMTP_SSL (Port 465) to {to_email}")
+            return True
+        except Exception as e_ssl:
+            print(f"⚠️ Port 465 SSL notice: {e_ssl}")
+        
+        # 2. Fallback: Port 587 with STARTTLS
+        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
         server.ehlo()
         server.starttls()
         server.ehlo()
@@ -455,11 +467,11 @@ def send_otp_email(to_email, otp):
         server.send_message(msg)
         server.quit()
         
-        print(f"✓ OTP successfully delivered via Gmail SMTP to {to_email}")
+        print(f"✓ OTP successfully delivered via Gmail STARTTLS (Port 587) to {to_email}")
         return True
         
     except Exception as e:
-        print(f"❌ Gmail SMTP error: {e}")
+        print(f"❌ Gmail SMTP error on both ports: {e}")
         print(f"📝 Backup: OTP for testing is: {otp}")
         return False
 
@@ -1021,6 +1033,9 @@ def verify_otp():
         name_part = parts[0]
         masked_email = (name_part[:2] + '***' + name_part[-1:] if len(name_part) > 3 else name_part[:1] + '***') + '@' + parts[1]
     
+    email_sent = session.get('email_sent', True)
+    last_otp = session.get('last_otp')
+    
     if request.method == 'POST':
         entered_otp = (request.form.get('otp') or '').strip()
         
@@ -1039,9 +1054,9 @@ def verify_otp():
                 return redirect(url_for('services_provider_dashboard'))
             return redirect(url_for('services_categories'))
         else:
-            return render_template('verify_otp.html', user=user, masked_email=masked_email, error="Invalid OTP passcode! Please enter the 6-digit code received on your registered email.")
+            return render_template('verify_otp.html', user=user, masked_email=masked_email, email_sent=email_sent, last_otp=last_otp, error="Invalid OTP passcode! Please enter the 6-digit code received on your registered email.")
     
-    return render_template('verify_otp.html', user=user, masked_email=masked_email)
+    return render_template('verify_otp.html', user=user, masked_email=masked_email, email_sent=email_sent, last_otp=last_otp)
 
 @app.route('/resend-otp', methods=['GET', 'POST'])
 def resend_otp():
@@ -1059,7 +1074,9 @@ def resend_otp():
     db.session.add(otp_session)
     db.session.commit()
     
-    send_otp_email(user.email, otp)
+    email_sent = send_otp_email(user.email, otp)
+    session['email_sent'] = email_sent
+    session['last_otp'] = otp
     
     masked_email = user.email
     if '@' in user.email:
@@ -1067,7 +1084,7 @@ def resend_otp():
         name_part = parts[0]
         masked_email = (name_part[:2] + '***' + name_part[-1:] if len(name_part) > 3 else name_part[:1] + '***') + '@' + parts[1]
     
-    return render_template('verify_otp.html', user=user, masked_email=masked_email, success=f"A fresh security passcode has been sent to {masked_email}!")
+    return render_template('verify_otp.html', user=user, masked_email=masked_email, email_sent=email_sent, last_otp=otp, success=f"A fresh security passcode has been dispatched to {masked_email}!")
 
 @app.route('/profile-setup', methods=['GET', 'POST'])
 def profile_setup():
